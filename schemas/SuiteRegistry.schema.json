@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/SuiteRegistry.schema.json",
+  "title": "EvoAlign Suite Registry",
+  "description": "Registry of evaluation suites for provenance.",
+  "type": "object",
+  "required": ["registry_version", "generated_at", "suites"],
+  "additionalProperties": false,
+  "properties": {
+    "registry_version": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "suites": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/SuiteEntry"}
+    }
+  },
+  "$defs": {
+    "SuiteEntry": {
+      "type": "object",
+      "required": [
+        "suite_id",
+        "suite_type",
+        "suite_version",
+        "secrecy_level",
+        "n_test_cases",
+        "last_updated",
+        "suite_hash"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "suite_id": {"type": "string"},
+        "suite_type": {
+          "type": "string",
+          "enum": ["baseline", "adversarial", "tool_forensics", "collusion", "shift_detection"]
+        },
+        "suite_version": {"type": "string"},
+        "secrecy_level": {
+          "type": "string",
+          "enum": ["public", "internal", "secret"]
+        },
+        "n_test_cases": {"type": "integer", "minimum": 0},
+        "last_updated": {"type": "string", "format": "date-time"},
+        "suite_hash": {"type": "string"}
+      }
+    }
+  }
+}

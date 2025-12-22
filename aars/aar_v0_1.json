@@ -1,0 +1,245 @@
+{
+  "aar_id": "aar_v0_1",
+  "version": "0.1.0",
+  "release_id": "release_demo_v1",
+  "generated_at": "2025-01-16T03:00:00Z",
+  "scope_and_threat_model": {
+    "in_scope": {
+      "deployment_contexts": ["tool_access:web+email", "no_tools"],
+      "capabilities_covered": ["assistant", "tool_use"],
+      "user_populations": ["enterprise_users", "researchers"]
+    },
+    "out_of_scope": {
+      "excluded_contexts": ["tool_access:any"],
+      "excluded_capabilities": ["autonomous_actuation"],
+      "rationale": "Autonomous actuation is deferred pending additional oversight tooling."
+    },
+    "adversary_model": {
+      "considered_adversaries": ["motivated_jailbreakers", "adaptive_adversaries"],
+      "adversary_capabilities_assumed": ["prompt_injection", "multi_step_attacks"],
+      "adaptive_threat_considerations": "Adversaries may adapt to published guardrails."
+    }
+  },
+  "safety_contract": {
+    "contract_version": "0.4.0",
+    "contract_hash": "sha256:e9465021c6bdbfb48376af09f4fb1c4819ea538763a966f86242d6d003ae3d33",
+    "context_lattice_version": "0.1.0",
+    "context_lattice_hash": "sha256:c0545c44a746a52ea623e1b5b82b0a84acdf2b0727487c4fb5e9fe11cd20bb78",
+    "hazard_summary": [
+      {"hazard_id": "H1", "name": "Deception", "severities_defined": ["S1", "S2", "S3"]},
+      {"hazard_id": "H2", "name": "Coercion/Manipulation", "severities_defined": ["S1", "S2", "S3"]},
+      {"hazard_id": "H4", "name": "Tool Misuse", "severities_defined": ["S2", "S3"]},
+      {"hazard_id": "H6", "name": "Unauthorized Autonomy", "severities_defined": ["S3", "S4"]}
+    ]
+  },
+  "evaluation_coverage": {
+    "coverage_matrix": [
+      {"hazard_id": "H1", "suites": ["suite_core_v1"], "coverage_confidence": "medium"},
+      {"hazard_id": "H2", "suites": ["suite_core_v1", "suite_tools_v1"], "coverage_confidence": "medium"},
+      {"hazard_id": "H4", "suites": ["suite_tools_v1"], "coverage_confidence": "low"},
+      {"hazard_id": "H6", "suites": ["suite_secret_autonomy_v1"], "coverage_confidence": "low"}
+    ],
+    "suite_inventory": [
+      {
+        "suite_id": "suite_core_v1",
+        "type": "baseline",
+        "secrecy_level": "public",
+        "n_test_cases": 1200,
+        "last_updated": "2025-01-10T00:00:00Z"
+      },
+      {
+        "suite_id": "suite_tools_v1",
+        "type": "tool_forensics",
+        "secrecy_level": "internal",
+        "n_test_cases": 600,
+        "last_updated": "2025-01-12T00:00:00Z"
+      },
+      {
+        "suite_id": "suite_secret_autonomy_v1",
+        "type": "adversarial",
+        "secrecy_level": "secret",
+        "n_test_cases": 2,
+        "last_updated": "2025-01-12T00:00:00Z"
+      }
+    ],
+    "secret_suite_attestation": {
+      "secret_suites_used": true,
+      "attestation_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8",
+      "attester_role": "Evaluation Lead"
+    }
+  },
+  "risk_modeling": {
+    "sweep_summary": {
+      "total_episodes_evaluated": 1800,
+      "oversight_levels_tested": [100, 500, 1000],
+      "date_range": {
+        "start": "2025-01-13T00:00:00Z",
+        "end": "2025-01-14T23:59:59Z"
+      }
+    },
+    "risk_curve_fits": [
+      {
+        "fit_id": "fit_h6_s4_any_v1",
+        "hazard_id": "H6",
+        "context_class": "any",
+        "conservative_k_low": 0.0001,
+        "conservative_epsilon_high": 5e-07,
+        "goodness_of_fit": {"aic": 102.4, "pseudo_r_squared": 0.61}
+      },
+      {
+        "fit_id": "fit_h1_s3_any_v1",
+        "hazard_id": "H1",
+        "context_class": "any",
+        "conservative_k_low": 0.01,
+        "conservative_epsilon_high": 3e-05,
+        "goodness_of_fit": {"aic": 95.1, "pseudo_r_squared": 0.54}
+      },
+      {
+        "fit_id": "fit_h2_s3_tools_v1",
+        "hazard_id": "H2",
+        "context_class": "tool_access:web+email",
+        "conservative_k_low": 0.005,
+        "conservative_epsilon_high": 2e-05,
+        "goodness_of_fit": {"aic": 88.7, "pseudo_r_squared": 0.58}
+      },
+      {
+        "fit_id": "fit_h4_s3_tool_any_v1",
+        "hazard_id": "H4",
+        "context_class": "tool_access:any",
+        "conservative_k_low": 0.003,
+        "conservative_epsilon_high": 4e-05,
+        "goodness_of_fit": {"aic": 91.3, "pseudo_r_squared": 0.56}
+      }
+    ],
+    "risk_fit_artifacts": [
+      {
+        "fit_id": "fit_h6_s4_any_v1",
+        "fit_hash": "sha256:94f5a73a57f0f1cbaaa9468f7ff9e6909f75553e9140d8f6b04262db95940d47",
+        "sweep_id": "sweep_h6_s4_any_v1",
+        "sweep_hash": "sha256:23259fd0817e40b5c89fbcd2a2d889ee733b322934b08f23aedf30917a8da7d8",
+        "eval_run_id": "evalrun_2025_01_15",
+        "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8"
+      },
+      {
+        "fit_id": "fit_h1_s3_any_v1",
+        "fit_hash": "sha256:e20976ced05125d4e8c6c310ca2c20b8eb75e28004ae295decf8ae5d19fc740f",
+        "sweep_id": "sweep_h1_s3_any_v1",
+        "sweep_hash": "sha256:162714b7266ffe87fe2e173922c768b7e919fa9442f0c85b1fac2d8ee6587446",
+        "eval_run_id": "evalrun_2025_01_15",
+        "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8"
+      },
+      {
+        "fit_id": "fit_h2_s3_tools_v1",
+        "fit_hash": "sha256:cacc64bc53fff8ab0f2246630fd8db5f2d9dc728ed7cb585def1760b6d7326cb",
+        "sweep_id": "sweep_h2_s3_tools_v1",
+        "sweep_hash": "sha256:18b2b77c719f5b4eb6c4fdb58b7103e6b7013128402f2e3a9dde929a25c8524c",
+        "eval_run_id": "evalrun_2025_01_15",
+        "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8"
+      },
+      {
+        "fit_id": "fit_h4_s3_tool_any_v1",
+        "fit_hash": "sha256:d3b33e12a2630377eb9d8c96a0729e1f561649b4c26b585d03e69164c3613eb0",
+        "sweep_id": "sweep_h4_s3_tool_any_v1",
+        "sweep_hash": "sha256:1e4f0a42cdd826d5bde7cbdf9b2853ff83d5deff5c243bf940dec8f90153d698",
+        "eval_run_id": "evalrun_2025_01_15",
+        "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8"
+      }
+    ],
+    "fit_diagnostics_summary": {
+      "all_fits_pass_gof": true,
+      "overdispersion_detected": false,
+      "extrapolation_warnings": []
+    }
+  },
+  "oversight_policy": {
+    "plans_by_context": [
+      {
+        "context_class": "tool_access:web+email",
+        "plan_id": "prod_v1_web_email",
+        "plan_hash": "sha256:02c6992f6c030d4af713f756e4ca21efb2053ba77ad33620d2c9c478e8cf3512",
+        "channel_allocations": {"human_review": 1000, "audit": 500},
+        "risk_bounds_met": true,
+        "margin_summary": {"min_margin": 4e-5, "hazard_with_min_margin": "H2"}
+      },
+      {
+        "context_class": "no_tools",
+        "plan_id": "prod_v1_no_tools",
+        "plan_hash": "sha256:02c6992f6c030d4af713f756e4ca21efb2053ba77ad33620d2c9c478e8cf3512",
+        "channel_allocations": {"human_review": 800, "audit": 400},
+        "risk_bounds_met": true,
+        "margin_summary": {"min_margin": 4e-5, "hazard_with_min_margin": "H2"}
+      }
+    ],
+    "conservative_margins_applied": true,
+    "budgeting_mode": "worst_case"
+  },
+  "stability_controls": {
+    "update_policy": {
+      "cadence": "quarterly",
+      "smoothing_method": "ema",
+      "delta_max": 0.1,
+      "n_min": 5
+    },
+    "thrash_detection_results": {
+      "thrashing_detected": false,
+      "periods_analyzed": 4,
+      "max_oscillation_observed": 0.02
+    },
+    "stability_attestation": "No instability observed in oversight allocations."
+  },
+  "lineage_references": {
+    "lineage_ids": []
+  },
+  "operational_controls": {
+    "monitoring": {
+      "metrics_collected": ["incident_rate", "jailbreak_rate", "tool_misuse_rate"],
+      "alerting_thresholds": [
+        {"metric": "incident_rate", "threshold": 0.01, "action": "page"}
+      ],
+      "anomaly_detection_enabled": true
+    },
+    "incident_response": {
+      "playbook_version": "IR-1.0",
+      "severity_classification": ["sev1", "sev2", "sev3"],
+      "response_time_slas": {"sev1": "1h", "sev2": "4h"},
+      "escalation_contacts": ["oncall-security"]
+    },
+    "rollback": {
+      "rollback_target": "release_demo_v0",
+      "rollback_target_certified": true,
+      "rollback_procedure_tested": true,
+      "estimated_rollback_time": "2h"
+    }
+  },
+  "reproducibility": {
+    "code_commit": "HEAD",
+    "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+    "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+    "suite_set_hashes": {
+      "core_v1": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c"
+    },
+    "context_lattice_hash": "sha256:c0545c44a746a52ea623e1b5b82b0a84acdf2b0727487c4fb5e9fe11cd20bb78",
+    "secret_hash_registry_hash": "sha256:90b143f781be3b5da291ceeac1ca7892780f9c4848266748732b05a2f88d33cb",
+    "secrecy_hash_scheme_id": "sha256-v1",
+    "dataset_hashes": {
+      "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+    },
+    "random_seeds": {
+      "eval_run": 17
+    }
+  },
+  "known_gaps": {
+    "gaps": []
+  },
+  "governance": {
+    "rfc_references": ["RFC-FIT-0001", "RFC-SWEEP-0001", "RFC-EVAL-0001"],
+    "approvals": [
+      {
+        "role": "Safety Lead",
+        "approved": true,
+        "timestamp": "2025-01-16T03:00:00Z",
+        "signature": "sig_aar_v1"
+      }
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/RiskSweepManifest.schema.json",
+  "title": "EvoAlign Risk Sweep Manifest",
+  "description": "Manifest for risk sweep inputs and outputs.",
+  "type": "object",
+  "required": [
+    "sweep_id",
+    "hazard_id",
+    "severity_id",
+    "context_class",
+    "oversight_levels_tested",
+    "eval_run_ids",
+    "eval_run_hashes",
+    "rfc_reference",
+    "approvals",
+    "fitting_inputs_hash",
+    "generated_at",
+    "generator_commit"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "sweep_id": {"type": "string"},
+    "hazard_id": {"type": "string", "pattern": "^H[0-9]+$"},
+    "severity_id": {"type": "string", "pattern": "^S[0-4]$"},
+    "context_class": {"type": "string"},
+    "oversight_levels_tested": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "number"}
+    },
+    "eval_run_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "eval_run_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    },
+    "rfc_reference": {"type": "string"},
+    "approvals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/Approval"}
+    },
+    "fitting_inputs_hash": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "generator_commit": {"type": "string"},
+    "notes": {"type": "string"}
+  },
+  "$defs": {
+    "Approval": {
+      "type": "object",
+      "required": ["role", "signature", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"type": "string"},
+        "signature": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

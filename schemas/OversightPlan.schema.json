@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/OversightPlan.schema.json",
+  "title": "EvoAlign Oversight Plan",
+  "description": "Oversight plan outputs with fit provenance bindings.",
+  "type": "object",
+  "required": [
+    "plan_version",
+    "generated_at",
+    "plans_by_context",
+    "computed_from_fit_hashes",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "plan_version": {"type": "string"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "plans_by_context": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/PlanEntry"}
+    },
+    "computed_from_fit_ids": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "computed_from_fit_hashes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/FitHashRef"}
+    },
+    "conservative_margins_applied": {"type": "boolean"},
+    "budgeting_mode": {"type": "string"},
+    "provenance": {"$ref": "#/$defs/PlanProvenance"}
+  },
+  "$defs": {
+    "PlanEntry": {
+      "type": "object",
+      "required": ["context_class", "plan_id", "channel_allocations"],
+      "additionalProperties": false,
+      "properties": {
+        "context_class": {"type": "string"},
+        "plan_id": {"type": "string"},
+        "channel_allocations": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"type": "number"}
+        },
+        "risk_bounds_met": {"type": "boolean"},
+        "margin_summary": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "FitHashRef": {
+      "type": "object",
+      "required": ["fit_id", "fit_hash"],
+      "additionalProperties": false,
+      "properties": {
+        "fit_id": {"type": "string"},
+        "fit_hash": {"type": "string"}
+      }
+    },
+    "PlanProvenance": {
+      "type": "object",
+      "required": [
+        "governor_commit",
+        "contract_hash",
+        "suite_registry_hash",
+        "context_lattice_hash",
+        "generated_at"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "governor_commit": {"type": "string"},
+        "contract_hash": {"type": "string"},
+        "suite_registry_hash": {"type": "string"},
+        "context_lattice_hash": {"type": "string"},
+        "generated_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

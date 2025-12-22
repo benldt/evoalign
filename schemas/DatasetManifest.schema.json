@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/DatasetManifest.schema.json",
+  "title": "EvoAlign Dataset Manifest",
+  "description": "Manifest describing dataset snapshots used in evals.",
+  "type": "object",
+  "required": [
+    "dataset_id",
+    "source",
+    "snapshot_timestamp",
+    "dataset_hash",
+    "access_policy"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "dataset_id": {"type": "string"},
+    "source": {"type": "string"},
+    "snapshot_timestamp": {"type": "string", "format": "date-time"},
+    "dataset_hash": {"type": "string"},
+    "access_policy": {"type": "string", "enum": ["public", "internal", "secret"]},
+    "notes": {"type": "string"}
+  }
+}

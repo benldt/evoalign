@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/RiskCurveFit.schema.json",
+  "title": "EvoAlign Risk Curve Fit",
+  "description": "Risk curve fit artifact with provenance requirements.",
+  "oneOf": [
+    {"$ref": "#/$defs/RiskCurveFit"},
+    {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/RiskCurveFit"}
+    }
+  ],
+  "$defs": {
+    "RiskCurveFit": {
+      "type": "object",
+      "required": [
+        "fit_id",
+        "hazard_id",
+        "severity_id",
+        "context_class",
+        "conservative_epsilon_high",
+        "conservative_k_low",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "fit_id": {"type": "string"},
+        "hazard_id": {"type": "string", "pattern": "^H[0-9]+$"},
+        "severity_id": {"type": "string", "pattern": "^S[0-4]$"},
+        "context_class": {"type": "string"},
+        "epsilon_high": {"type": "number"},
+        "conservative_epsilon_high": {"type": "number"},
+        "k_low": {"type": "number"},
+        "conservative_k_low": {"type": "number"},
+        "k_low_by_channel": {
+          "type": "object",
+          "additionalProperties": {"type": "number"}
+        },
+        "goodness_of_fit": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "provenance": {"$ref": "#/$defs/RiskFitProvenance"}
+      }
+    },
+    "RiskFitProvenance": {
+      "type": "object",
+      "required": [
+        "provenance_version",
+        "rfc_reference",
+        "approvals",
+        "fit_generator_commit",
+        "eval_run_id",
+        "eval_run_hash",
+        "sweep_id",
+        "sweep_hash",
+        "suite_set_id",
+        "suite_set_hash",
+        "suite_registry_hash",
+        "config_hash",
+        "dataset_hashes",
+        "random_seeds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "provenance_version": {"type": "string"},
+        "rfc_reference": {"type": "string"},
+        "approvals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/Approval"}
+        },
+        "fit_generator_commit": {"type": "string"},
+        "eval_run_id": {"type": "string"},
+        "eval_run_hash": {"type": "string"},
+        "sweep_id": {"type": "string"},
+        "sweep_hash": {"type": "string"},
+        "suite_set_id": {"type": "string"},
+        "suite_set_hash": {"type": "string"},
+        "suite_registry_hash": {"type": "string"},
+        "config_hash": {"type": "string"},
+        "dataset_hashes": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"type": "string"}
+        },
+        "random_seeds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "integer"}
+        },
+        "environment": {"type": "object"},
+        "signature": {"type": "string"},
+        "valid_until": {"type": "string", "format": "date-time"}
+      }
+    },
+    "Approval": {
+      "type": "object",
+      "required": ["role", "signature", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"type": "string"},
+        "signature": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

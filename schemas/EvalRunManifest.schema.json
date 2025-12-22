@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/EvalRunManifest.schema.json",
+  "title": "EvoAlign Eval Run Manifest",
+  "description": "Manifest describing an evaluation run.",
+  "type": "object",
+  "required": [
+    "eval_run_id",
+    "suite_set_id",
+    "suite_set_hash",
+    "dataset_ids",
+    "dataset_hashes",
+    "rfc_reference",
+    "approvals",
+    "code_commit",
+    "config_hash",
+    "random_seeds",
+    "date_range",
+    "result_summary_hash"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "eval_run_id": {"type": "string"},
+    "suite_set_id": {"type": "string"},
+    "suite_set_hash": {"type": "string"},
+    "dataset_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "dataset_hashes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string"}
+    },
+    "rfc_reference": {"type": "string"},
+    "approvals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/Approval"}
+    },
+    "code_commit": {"type": "string"},
+    "config_hash": {"type": "string"},
+    "random_seeds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "integer"}
+    },
+    "date_range": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "result_summary_hash": {"type": "string"},
+    "attestation": {"type": "object"}
+  },
+  "$defs": {
+    "Approval": {
+      "type": "object",
+      "required": ["role", "signature", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"type": "string"},
+        "signature": {"type": "string"},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

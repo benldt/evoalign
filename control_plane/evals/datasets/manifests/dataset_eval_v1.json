@@ -1,0 +1,8 @@
+{
+  "dataset_id": "dataset_eval_v1",
+  "source": "internal",
+  "snapshot_timestamp": "2025-01-14T00:00:00Z",
+  "dataset_hash": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2",
+  "access_policy": "internal",
+  "notes": "Snapshot used for baseline risk sweeps."
+}

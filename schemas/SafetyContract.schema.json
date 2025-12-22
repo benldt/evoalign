@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/SafetyContract.schema.json",
+  "title": "EvoAlign Safety Contract",
+  "description": "The normative core: defines hazards, severities, disallowed events, and risk tolerances per EvoAlign v2 §3",
+  "type": "object",
+  "required": ["version", "unit_of_analysis", "hazards", "severities", "tolerances", "adversary_model"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+.*$",
+      "description": "Semantic version of this contract"
+    },
+    "unit_of_analysis": {
+      "type": "string",
+      "enum": ["episode", "conversation", "tool_call", "day"],
+      "description": "Unit for risk statements (episode recommended per §2.4)"
+    },
+    "adversary_model": {
+      "type": "object",
+      "description": "Per §2.3: which adversaries are considered",
+      "required": ["considered_adversaries"],
+      "properties": {
+        "considered_adversaries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "opportunistic_users",
+              "motivated_jailbreakers", 
+              "coordinated_adversaries",
+              "insider_threats",
+              "adaptive_adversaries",
+              "distribution_shift"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional context on adversary assumptions"
+        }
+      }
+    },
+    "hazards": {
+      "type": "array",
+      "description": "Hazard taxonomy per §3.1",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Hazard"
+      }
+    },
+    "severities": {
+      "type": "array",
+      "description": "Severity tier definitions per §3.2",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/SeverityTier"
+      }
+    },
+    "disallowed_events": {
+      "type": "array",
+      "description": "Testable violation event definitions per §3.3",
+      "items": {
+        "$ref": "#/$defs/DisallowedEvent"
+      }
+    },
+    "tolerances": {
+      "type": "array",
+      "description": "Risk tolerances by hazard/context per §3.4",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Tolerance"
+      }
+    },
+    "escalation_rules": {
+      "type": "array",
+      "description": "What actions are required at each severity level",
+      "items": {
+        "$ref": "#/$defs/EscalationRule"
+      }
+    },
+    "metadata": {
+      "$ref": "#/$defs/ContractMetadata"
+    }
+  },
+  "$defs": {
+    "Hazard": {
+      "type": "object",
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^H[0-9]+$",
+          "description": "Hazard identifier (e.g., H1, H2)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "examples": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "related_hazards": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^H[0-9]+$"}
+        }
+      }
+    },
+    "SeverityTier": {
+      "type": "object",
+      "required": ["id", "name", "definition", "response_class"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^S[0-4]$",
+          "description": "Severity identifier (S0-S4)"
+        },
+        "name": {
+          "type": "string"
+        },
+        "definition": {
+          "type": "string",
+          "description": "Crisp definition of this severity level"
+        },
+        "response_class": {
+          "type": "string",
+          "enum": ["allow", "mitigate_monitor", "hard_block"],
+          "description": "Required response class"
+        },
+        "examples": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "DisallowedEvent": {
+      "type": "object",
+      "description": "Operationally testable violation event definition per §3.3",
+      "required": ["hazard_id", "severity_id", "definition", "detection"],
+      "properties": {
+        "hazard_id": {
+          "type": "string",
+          "pattern": "^H[0-9]+$"
+        },
+        "severity_id": {
+          "type": "string",
+          "pattern": "^S[0-4]$"
+        },
+        "definition": {
+          "type": "string",
+          "description": "Natural language definition of the violation event"
+        },
+        "detection": {
+          "type": "object",
+          "required": ["method", "threshold"],
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": ["rubric", "classifier", "forensic_logs", "multi_evaluator", "tool_trace_analysis"],
+              "description": "How violation is detected"
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Detection threshold"
+            },
+            "reliability_min_kappa": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Minimum inter-rater reliability (Cohen's kappa)"
+            },
+            "evaluator_suite_id": {
+              "type": "string",
+              "description": "Reference to evaluation suite used"
+            }
+          }
+        },
+        "known_blind_spots": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Known failure modes of this detection method"
+        }
+      }
+    },
+    "Tolerance": {
+      "type": "object",
+      "required": ["hazard_id", "context_class", "severity_id", "tau", "confidence"],
+      "properties": {
+        "hazard_id": {
+          "type": "string",
+          "pattern": "^H[0-9]+$"
+        },
+        "context_class": {
+          "type": "string",
+          "description": "Context identifier (e.g., 'tool_access:web+email', 'no_tools', 'full_autonomy')"
+        },
+        "severity_id": {
+          "type": "string", 
+          "pattern": "^S[0-4]$"
+        },
+        "tau": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Maximum acceptable probability of violation event per unit"
+        },
+        "confidence": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Required confidence level (1 - delta)"
+        },
+        "justification": {
+          "type": "string",
+          "description": "Rationale for this tolerance level"
+        }
+      }
+    },
+    "EscalationRule": {
+      "type": "object",
+      "required": ["severity_id", "actions"],
+      "properties": {
+        "severity_id": {
+          "type": "string",
+          "pattern": "^S[0-4]$"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "log_only",
+              "human_review",
+              "deny_response", 
+              "safe_completion_mode",
+              "increase_oversight",
+              "revoke_tool_access",
+              "immediate_rollback",
+              "lineage_probation",
+              "lineage_retirement"
+            ]
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "ContractMetadata": {
+      "type": "object",
+      "required": [
+        "rfc_reference",
+        "approvals",
+        "context_lattice_version",
+        "context_lattice_hash"
+      ],
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_modified": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "rfc_reference": {
+          "type": "string",
+          "description": "Reference to RFC that approved this version"
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "signature", "timestamp"],
+            "properties": {
+              "role": {"type": "string"},
+              "signature": {"type": "string"},
+              "timestamp": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        "context_lattice_version": {
+          "type": "string",
+          "description": "Version of the context lattice registry used by this contract"
+        },
+        "context_lattice_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the context lattice file"
+        },
+        "supersedes": {
+          "type": "string",
+          "description": "Previous contract version this supersedes"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,174 @@
+[
+  {
+    "fit_id": "fit_h6_s4_any_v1",
+    "hazard_id": "H6",
+    "severity_id": "S4",
+    "context_class": "any",
+    "conservative_epsilon_high": 5e-07,
+    "conservative_k_low": 0.0001,
+    "k_low_by_channel": {
+      "human_review": 0.0001,
+      "audit": 0.0001
+    },
+    "goodness_of_fit": {
+      "aic": 102.4,
+      "pseudo_r_squared": 0.61
+    },
+    "provenance": {
+      "provenance_version": "0.1.0",
+      "rfc_reference": "RFC-FIT-0001",
+      "approvals": [
+        {
+          "role": "Risk Lead",
+          "signature": "sig_fit_v1",
+          "timestamp": "2025-01-16T01:00:00Z"
+        }
+      ],
+      "fit_generator_commit": "HEAD",
+      "eval_run_id": "evalrun_2025_01_15",
+      "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8",
+      "sweep_id": "sweep_h6_s4_any_v1",
+      "sweep_hash": "sha256:23259fd0817e40b5c89fbcd2a2d889ee733b322934b08f23aedf30917a8da7d8",
+      "suite_set_id": "core_v1",
+      "suite_set_hash": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c",
+      "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+      "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+      "dataset_hashes": {
+        "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+      },
+      "random_seeds": [
+        17,
+        23
+      ]
+    }
+  },
+  {
+    "fit_id": "fit_h1_s3_any_v1",
+    "hazard_id": "H1",
+    "severity_id": "S3",
+    "context_class": "any",
+    "conservative_epsilon_high": 3e-05,
+    "conservative_k_low": 0.01,
+    "k_low_by_channel": {
+      "human_review": 0.01,
+      "audit": 0.01
+    },
+    "goodness_of_fit": {
+      "aic": 95.1,
+      "pseudo_r_squared": 0.54
+    },
+    "provenance": {
+      "provenance_version": "0.1.0",
+      "rfc_reference": "RFC-FIT-0001",
+      "approvals": [
+        {
+          "role": "Risk Lead",
+          "signature": "sig_fit_v1",
+          "timestamp": "2025-01-16T01:00:00Z"
+        }
+      ],
+      "fit_generator_commit": "HEAD",
+      "eval_run_id": "evalrun_2025_01_15",
+      "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8",
+      "sweep_id": "sweep_h1_s3_any_v1",
+      "sweep_hash": "sha256:162714b7266ffe87fe2e173922c768b7e919fa9442f0c85b1fac2d8ee6587446",
+      "suite_set_id": "core_v1",
+      "suite_set_hash": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c",
+      "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+      "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+      "dataset_hashes": {
+        "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+      },
+      "random_seeds": [
+        17,
+        23
+      ]
+    }
+  },
+  {
+    "fit_id": "fit_h2_s3_tools_v1",
+    "hazard_id": "H2",
+    "severity_id": "S3",
+    "context_class": "tool_access:web+email",
+    "conservative_epsilon_high": 2e-05,
+    "conservative_k_low": 0.005,
+    "k_low_by_channel": {
+      "human_review": 0.005,
+      "audit": 0.005
+    },
+    "goodness_of_fit": {
+      "aic": 88.7,
+      "pseudo_r_squared": 0.58
+    },
+    "provenance": {
+      "provenance_version": "0.1.0",
+      "rfc_reference": "RFC-FIT-0001",
+      "approvals": [
+        {
+          "role": "Risk Lead",
+          "signature": "sig_fit_v1",
+          "timestamp": "2025-01-16T01:00:00Z"
+        }
+      ],
+      "fit_generator_commit": "HEAD",
+      "eval_run_id": "evalrun_2025_01_15",
+      "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8",
+      "sweep_id": "sweep_h2_s3_tools_v1",
+      "sweep_hash": "sha256:18b2b77c719f5b4eb6c4fdb58b7103e6b7013128402f2e3a9dde929a25c8524c",
+      "suite_set_id": "core_v1",
+      "suite_set_hash": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c",
+      "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+      "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+      "dataset_hashes": {
+        "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+      },
+      "random_seeds": [
+        17,
+        23
+      ]
+    }
+  },
+  {
+    "fit_id": "fit_h4_s3_tool_any_v1",
+    "hazard_id": "H4",
+    "severity_id": "S3",
+    "context_class": "tool_access:any",
+    "conservative_epsilon_high": 4e-05,
+    "conservative_k_low": 0.003,
+    "k_low_by_channel": {
+      "human_review": 0.003,
+      "audit": 0.003
+    },
+    "goodness_of_fit": {
+      "aic": 91.3,
+      "pseudo_r_squared": 0.56
+    },
+    "provenance": {
+      "provenance_version": "0.1.0",
+      "rfc_reference": "RFC-FIT-0001",
+      "approvals": [
+        {
+          "role": "Risk Lead",
+          "signature": "sig_fit_v1",
+          "timestamp": "2025-01-16T01:00:00Z"
+        }
+      ],
+      "fit_generator_commit": "HEAD",
+      "eval_run_id": "evalrun_2025_01_15",
+      "eval_run_hash": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8",
+      "sweep_id": "sweep_h4_s3_tool_any_v1",
+      "sweep_hash": "sha256:1e4f0a42cdd826d5bde7cbdf9b2853ff83d5deff5c243bf940dec8f90153d698",
+      "suite_set_id": "core_v1",
+      "suite_set_hash": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c",
+      "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+      "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+      "dataset_hashes": {
+        "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+      },
+      "random_seeds": [
+        17,
+        23
+      ]
+    }
+  }
+]

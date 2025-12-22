@@ -1,0 +1,14 @@
+{
+  "suite_set_id": "core_v1",
+  "suite_ids": ["suite_core_v1", "suite_tools_v1"],
+  "registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+  "created_at": "2025-01-15T00:00:00Z",
+  "rfc_reference": "RFC-EVAL-0001",
+  "approvals": [
+    {
+      "role": "Evaluation Lead",
+      "signature": "sig_eval_core_v1",
+      "timestamp": "2025-01-15T01:00:00Z"
+    }
+  ]
+}

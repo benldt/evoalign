@@ -1,0 +1,447 @@
+# EvoAlign CI Pipeline
+# ====================
+# Enforces invariants per EvoAlign v2 §14.3
+# 
+# This pipeline MUST pass for any PR to merge. It turns the spec into
+# actual engineering discipline by blocking changes that violate invariants.
+
+name: EvoAlign Invariants
+
+on:
+  pull_request:
+    branches: [main, release/*]
+  push:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ===========================================================================
+  # Schema Validation
+  # ===========================================================================
+  schema-validation:
+    name: Validate JSON Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          pip install jsonschema pyyaml
+          
+      - name: Validate schema syntax
+        run: |
+          python -c "
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          
+          schemas_dir = Path('schemas')
+          errors = []
+          
+          for schema_file in schemas_dir.glob('*.schema.json'):
+              print(f'Validating {schema_file}...')
+              try:
+                  with open(schema_file) as f:
+                      schema = json.load(f)
+                  Draft202012Validator.check_schema(schema)
+                  print(f'  ✓ Valid')
+              except Exception as e:
+                  print(f'  ✗ Invalid: {e}')
+                  errors.append((schema_file, str(e)))
+                  
+          if errors:
+              print(f'\\n{len(errors)} schema(s) invalid')
+              exit(1)
+          print(f'\\nAll schemas valid')
+          "
+          
+      - name: Validate data files against schemas
+        run: |
+          python -c "
+          import json
+          import yaml
+          from pathlib import Path
+          from jsonschema import validate, ValidationError
+          
+          SCHEMA_TARGETS = [
+              {'path': 'contracts/safety_contracts', 'schema': 'SafetyContract.schema.json', 'allow_yaml': True},
+              {'path': 'contracts/context_lattice', 'schema': 'ContextLattice.schema.json', 'allow_yaml': True},
+              {'path': 'control_plane/governor/risk_fits', 'schema': 'RiskCurveFit.schema.json'},
+              {'path': 'control_plane/governor/oversight_plans', 'schema': 'OversightPlan.schema.json'},
+              {'path': 'control_plane/governor/sweeps', 'schema': 'RiskSweepManifest.schema.json'},
+              {'path': 'control_plane/evals/suites/registry.json', 'schema': 'SuiteRegistry.schema.json', 'single_file': True},
+              {'path': 'control_plane/evals/suites/hash_registries', 'schema': 'SecretSuiteHashRegistry.schema.json'},
+              {'path': 'control_plane/evals/suites/sets', 'schema': 'SuiteSet.schema.json'},
+              {'path': 'control_plane/evals/runs', 'schema': 'EvalRunManifest.schema.json'},
+              {'path': 'control_plane/evals/datasets/manifests', 'schema': 'DatasetManifest.schema.json'},
+              {'path': 'control_plane/ledger', 'schema': 'LineageLedgerEntry.schema.json'},
+              {'path': 'culture/chronicle', 'schema': 'ChronicleEntry.schema.json'},
+          ]
+          
+          errors = []
+          
+          def validate_file(schema, data_file, loader):
+              print(f'Validating {data_file}...')
+              try:
+                  with open(data_file) as f:
+                      data = loader(f)
+                  validate(instance=data, schema=schema)
+                  print(f'  ✓ Valid')
+              except ValidationError as e:
+                  print(f'  ✗ Invalid: {e.message}')
+                  errors.append((data_file, e.message))
+              except Exception as e:
+                  print(f'  ✗ Error: {e}')
+                  errors.append((data_file, str(e)))
+          
+          for target in SCHEMA_TARGETS:
+              data_path = Path(target['path'])
+              schema_path = Path('schemas') / target['schema']
+              
+              if not data_path.exists():
+                  print(f\"Skipping {target['path']} (not found)\")
+                  continue
+                  
+              if not schema_path.exists():
+                  print(f\"Warning: Schema {target['schema']} not found\")
+                  continue
+                  
+              with open(schema_path) as f:
+                  schema = json.load(f)
+              
+              if data_path.is_file():
+                  validate_file(schema, data_path, json.load)
+                  continue
+              
+              for data_file in data_path.rglob('*.json'):
+                  validate_file(schema, data_file, json.load)
+              
+              if target.get('allow_yaml'):
+                  for data_file in data_path.rglob('*.yaml'):
+                      validate_file(schema, data_file, yaml.safe_load)
+                  for data_file in data_path.rglob('*.yml'):
+                      validate_file(schema, data_file, yaml.safe_load)
+                          
+          if errors:
+              print(f'\\n{len(errors)} validation error(s)')
+              exit(1)
+          print('\\nAll data files valid')
+          "
+
+  # ===========================================================================
+  # Core Invariant Checks
+  # ===========================================================================
+  invariants:
+    name: Core Invariants
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for diff detection
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install dependencies
+        run: |
+          pip install pyyaml jsonschema
+          
+      - name: Run invariant checks
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+        run: |
+          python ci/invariants/check_invariants.py
+
+      - name: Generate context inventory
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+        run: |
+          python ci/invariants/context_inventory.py
+          
+      - name: Upload invariant results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: invariant-results
+          path: invariant_results.json
+          if-no-files-found: ignore
+
+      - name: Upload context inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: context-inventory
+          path: context_inventory.json
+          if-no-files-found: ignore
+
+  # ===========================================================================
+  # Coverage + LOC Gates
+  # ===========================================================================
+  quality-gates:
+    name: Coverage + LOC Gates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml jsonschema coverage
+
+      - name: Run tests with 100% coverage
+        run: |
+          python -m coverage run --branch --source=ci/invariants,evoalign -m unittest discover -s tests
+          python -m coverage report --fail-under=100
+
+      - name: Enforce 350 LOC limit
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+          MAX_LOC: 350
+        run: |
+          python ci/invariants/loc_check.py
+
+  # ===========================================================================
+  # Secrecy Boundary Check (Additional Defense)
+  # ===========================================================================
+  secrecy-boundary:
+    name: Secrecy Boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Generate secrecy audit
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+        run: |
+          python ci/invariants/secrecy_inventory.py
+
+      - name: Upload secrecy audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: secrecy-audit
+          path: secrecy_audit.json
+          if-no-files-found: ignore
+
+  # ===========================================================================
+  # Contract Change Governance
+  # ===========================================================================
+  contract-governance:
+    name: Contract Governance
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Detect contract changes
+        id: detect
+        run: |
+          CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -E "contracts/(safety_contracts|context_lattice)/.*\.(json|yaml)$" || true)
+          if [ -n "$CHANGED" ]; then
+            echo "contract_changed=true" >> $GITHUB_OUTPUT
+            echo "Changed contracts:"
+            echo "$CHANGED"
+          else
+            echo "contract_changed=false" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Verify RFC reference
+        if: steps.detect.outputs.contract_changed == 'true'
+        run: |
+          python3 << 'EOF'
+          import json
+          import yaml
+          import subprocess
+          import sys
+          
+          # Get changed contract files
+          result = subprocess.run(
+              ['git', 'diff', '--name-only', 
+               '${{ github.event.pull_request.base.sha }}', 
+               '${{ github.sha }}'],
+              capture_output=True, text=True
+          )
+          
+          changed_files = [f for f in result.stdout.strip().split('\n')
+                          if ('safety_contract' in f.lower() or 'context_lattice' in f.lower())]
+          
+          errors = []
+          for file_path in changed_files:
+              if not file_path:
+                  continue
+              print(f"Checking {file_path}...")
+              
+              try:
+                  with open(file_path) as f:
+                      if file_path.endswith('.yaml'):
+                          data = yaml.safe_load(f)
+                      else:
+                          data = json.load(f)
+                          
+                  metadata = data.get('metadata', {})
+                  
+                  if not metadata.get('rfc_reference'):
+                      errors.append(f"{file_path}: Missing rfc_reference")
+                      
+                  approvals = metadata.get('approvals', [])
+                  signed = [a for a in approvals if a.get('signature')]
+                  if not signed:
+                      errors.append(f"{file_path}: No signed approvals")
+                      
+              except Exception as e:
+                  errors.append(f"{file_path}: Parse error: {e}")
+                  
+          if errors:
+              print("\nContract governance failures:")
+              for e in errors:
+                  print(f"  ✗ {e}")
+              sys.exit(1)
+              
+          print("\nContract governance checks passed")
+          EOF
+
+  # ===========================================================================
+  # Salvage Safety Check
+  # ===========================================================================
+  salvage-safety:
+    name: Salvage Safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check salvage artifact certifications
+        run: |
+          python3 << 'EOF'
+          import json
+          from pathlib import Path
+          
+          errors = []
+          
+          # Find all salvage artifact references in deployable configs
+          deploy_paths = ['deployments/', 'releases/']
+          
+          for deploy_path in deploy_paths:
+              path = Path(deploy_path)
+              if not path.exists():
+                  continue
+                  
+              for config_file in path.rglob('*.json'):
+                  with open(config_file) as f:
+                      try:
+                          config = json.load(f)
+                      except:
+                          continue
+                          
+                  # Check for salvage references (recursively)
+                  def find_salvage(obj, path=""):
+                      refs = []
+                      if isinstance(obj, dict):
+                          if 'salvage_artifact_id' in obj:
+                              refs.append(obj['salvage_artifact_id'])
+                          if 'salvage_artifacts' in obj:
+                              refs.extend(obj['salvage_artifacts'] if isinstance(obj['salvage_artifacts'], list) else [obj['salvage_artifacts']])
+                          for k, v in obj.items():
+                              refs.extend(find_salvage(v))
+                      elif isinstance(obj, list):
+                          for item in obj:
+                              refs.extend(find_salvage(item))
+                      return refs
+                      
+                  salvage_refs = find_salvage(config)
+                  
+                  for ref in salvage_refs:
+                      # Verify certification in ledger
+                      certified = False
+                      ledger_path = Path('control_plane/ledger/')
+                      if ledger_path.exists():
+                          for entry_file in ledger_path.rglob('*.json'):
+                              with open(entry_file) as f:
+                                  try:
+                                      entry = json.load(f)
+                                  except:
+                                      continue
+                              for salvage in entry.get('salvage_artifacts', []):
+                                  if salvage.get('artifact_id') == ref:
+                                      if (salvage.get('quarantine_certified') and 
+                                          salvage.get('transfer_tests_passed') and
+                                          all(t.get('passed') for t in salvage.get('transfer_tests_passed', []))):
+                                          certified = True
+                                          break
+                              if certified:
+                                  break
+                                  
+                      if not certified:
+                          errors.append(f"{config_file}: Uncertified salvage artifact '{ref}'")
+                          
+          if errors:
+              print("Salvage safety failures:")
+              for e in errors:
+                  print(f"  ✗ {e}")
+              exit(1)
+              
+          print("Salvage safety check passed")
+          EOF
+
+  # ===========================================================================
+  # Summary Gate
+  # ===========================================================================
+  invariant-gate:
+    name: Invariant Gate
+    runs-on: ubuntu-latest
+    needs: [schema-validation, invariants, quality-gates, secrecy-boundary, salvage-safety]
+    if: always()
+    steps:
+      - name: Check all invariant jobs
+        run: |
+          echo "Checking invariant job results..."
+          
+          if [ "${{ needs.schema-validation.result }}" != "success" ]; then
+            echo "Schema validation failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.invariants.result }}" != "success" ]; then
+            echo "Core invariants failed"
+            exit 1
+          fi
+
+          if [ "${{ needs.quality-gates.result }}" != "success" ]; then
+            echo "Coverage/LOC gates failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.secrecy-boundary.result }}" != "success" ]; then
+            echo "Secrecy boundary check failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.salvage-safety.result }}" != "success" ]; then
+            echo "Salvage safety check failed"
+            exit 1
+          fi
+          
+          echo "All invariant checks passed ✓"

@@ -1,0 +1,28 @@
+{
+  "sweep_id": "sweep_h1_s3_any_v1",
+  "hazard_id": "H1",
+  "severity_id": "S3",
+  "context_class": "any",
+  "oversight_levels_tested": [
+    100,
+    500,
+    1000
+  ],
+  "eval_run_ids": [
+    "evalrun_2025_01_15"
+  ],
+  "eval_run_hashes": {
+    "evalrun_2025_01_15": "sha256:d453d8d95a60fe6741d64b003796fb6864765299561c7e0c3bee03f84244a4c8"
+  },
+  "rfc_reference": "RFC-SWEEP-0001",
+  "approvals": [
+    {
+      "role": "Risk Modeling Lead",
+      "signature": "sig_sweep_v1",
+      "timestamp": "2025-01-16T02:00:00Z"
+    }
+  ],
+  "fitting_inputs_hash": "sha256:f5d886303407957f23f3b2f75158acd9765cd2601fa49ebeadc406c7b2f5227b",
+  "generated_at": "2025-01-16T00:00:00Z",
+  "generator_commit": "HEAD"
+}

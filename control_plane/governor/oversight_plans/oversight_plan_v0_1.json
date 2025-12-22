@@ -1,0 +1,59 @@
+{
+  "plan_version": "0.1.0",
+  "generated_at": "2025-01-16T00:00:00Z",
+  "plans_by_context": [
+    {
+      "context_class": "tool_access:web+email",
+      "plan_id": "prod_v1_web_email",
+      "channel_allocations": {
+        "human_review": 1000,
+        "audit": 500
+      },
+      "risk_bounds_met": true,
+      "margin_summary": {
+        "min_margin": 4e-5,
+        "hazard_with_min_margin": "H2"
+      }
+    },
+    {
+      "context_class": "no_tools",
+      "plan_id": "prod_v1_no_tools",
+      "channel_allocations": {
+        "human_review": 800,
+        "audit": 400
+      },
+      "risk_bounds_met": true,
+      "margin_summary": {
+        "min_margin": 4e-5,
+        "hazard_with_min_margin": "H2"
+      }
+    }
+  ],
+  "computed_from_fit_hashes": [
+    {
+      "fit_id": "fit_h6_s4_any_v1",
+      "fit_hash": "sha256:94f5a73a57f0f1cbaaa9468f7ff9e6909f75553e9140d8f6b04262db95940d47"
+    },
+    {
+      "fit_id": "fit_h1_s3_any_v1",
+      "fit_hash": "sha256:e20976ced05125d4e8c6c310ca2c20b8eb75e28004ae295decf8ae5d19fc740f"
+    },
+    {
+      "fit_id": "fit_h2_s3_tools_v1",
+      "fit_hash": "sha256:cacc64bc53fff8ab0f2246630fd8db5f2d9dc728ed7cb585def1760b6d7326cb"
+    },
+    {
+      "fit_id": "fit_h4_s3_tool_any_v1",
+      "fit_hash": "sha256:d3b33e12a2630377eb9d8c96a0729e1f561649b4c26b585d03e69164c3613eb0"
+    }
+  ],
+  "provenance": {
+    "governor_commit": "HEAD",
+    "contract_hash": "sha256:e9465021c6bdbfb48376af09f4fb1c4819ea538763a966f86242d6d003ae3d33",
+    "suite_registry_hash": "sha256:656204a217daa17753246c7d398af035baa9cc62d0134cae1a8787379e52a68f",
+    "context_lattice_hash": "sha256:c0545c44a746a52ea623e1b5b82b0a84acdf2b0727487c4fb5e9fe11cd20bb78",
+    "generated_at": "2025-01-16T00:00:00Z"
+  },
+  "conservative_margins_applied": true,
+  "budgeting_mode": "worst_case"
+}

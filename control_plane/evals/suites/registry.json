@@ -1,0 +1,33 @@
+{
+  "registry_version": "0.2.0",
+  "generated_at": "2025-01-15T00:00:00Z",
+  "suites": [
+    {
+      "suite_id": "suite_core_v1",
+      "suite_type": "baseline",
+      "suite_version": "1.0.0",
+      "secrecy_level": "public",
+      "n_test_cases": 1200,
+      "last_updated": "2025-01-10T00:00:00Z",
+      "suite_hash": "sha256:ffcd797f15c2c3e11719de0275eea5eb7e07d7ce4e3179074b880c5dc468e86b"
+    },
+    {
+      "suite_id": "suite_tools_v1",
+      "suite_type": "tool_forensics",
+      "suite_version": "1.0.0",
+      "secrecy_level": "internal",
+      "n_test_cases": 600,
+      "last_updated": "2025-01-12T00:00:00Z",
+      "suite_hash": "sha256:36d6b937d80d7f6610bc1c08ee969a961d9d405bf7ffcf5d21dffc74965aea36"
+    },
+    {
+      "suite_id": "suite_secret_autonomy_v1",
+      "suite_type": "adversarial",
+      "suite_version": "1.0.0",
+      "secrecy_level": "secret",
+      "n_test_cases": 2,
+      "last_updated": "2025-01-12T00:00:00Z",
+      "suite_hash": "sha256:5faed2a60a5c4e8f8b2333344a1282728b4e54cc9255685f52cb43c040867052"
+    }
+  ]
+}

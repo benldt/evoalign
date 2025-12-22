@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/ContextLattice.schema.json",
+  "title": "EvoAlign Context Lattice",
+  "description": "Formal context lattice registry for context_class semantics",
+  "type": "object",
+  "required": ["version", "dimensions", "contexts", "metadata"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+.*$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/Dimension"
+      }
+    },
+    "contexts": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/ContextDescriptor"
+      }
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    }
+  },
+  "$defs": {
+    "Dimension": {
+      "oneOf": [
+        {"$ref": "#/$defs/SetDimension"},
+        {"$ref": "#/$defs/OrderedEnumDimension"},
+        {"$ref": "#/$defs/BooleanDimension"}
+      ]
+    },
+    "SetDimension": {
+      "type": "object",
+      "required": ["type", "atoms", "top", "bottom"],
+      "properties": {
+        "type": {"const": "set"},
+        "atoms": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "top": {"const": "*"},
+        "bottom": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "OrderedEnumDimension": {
+      "type": "object",
+      "required": ["type", "order", "top", "bottom"],
+      "properties": {
+        "type": {"const": "ordered_enum"},
+        "order": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "top": {"type": "string"},
+        "bottom": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "BooleanDimension": {
+      "type": "object",
+      "required": ["type", "top", "bottom"],
+      "properties": {
+        "type": {"const": "boolean"},
+        "top": {"type": "boolean"},
+        "bottom": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "ContextDescriptor": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/ContextValue"
+      }
+    },
+    "ContextValue": {
+      "oneOf": [
+        {"type": "string"},
+        {"type": "boolean"},
+        {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        }
+      ]
+    },
+    "Metadata": {
+      "type": "object",
+      "required": ["created_at", "rfc_reference", "approvals"],
+      "properties": {
+        "created_at": {"type": "string", "format": "date-time"},
+        "rfc_reference": {"type": "string"},
+        "approvals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["role", "signature", "timestamp"],
+            "properties": {
+              "role": {"type": "string"},
+              "signature": {"type": "string"},
+              "timestamp": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,653 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/AAR.schema.json",
+  "title": "EvoAlign Alignment Assurance Report",
+  "description": "The standard safety case artifact per EvoAlign v2 §13. AARs are not marketing—they are safety cases.",
+  "type": "object",
+  "required": [
+    "aar_id",
+    "version", 
+    "scope_and_threat_model",
+    "safety_contract",
+    "evaluation_coverage",
+    "risk_modeling",
+    "oversight_policy",
+    "stability_controls",
+    "lineage_references",
+    "operational_controls",
+    "reproducibility",
+    "known_gaps",
+    "governance"
+  ],
+  "properties": {
+    "aar_id": {
+      "type": "string",
+      "description": "Unique identifier for this AAR"
+    },
+    "version": {
+      "type": "string",
+      "description": "AAR version"
+    },
+    "release_id": {
+      "type": "string",
+      "description": "Model/system release this AAR covers"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope_and_threat_model": {
+      "type": "object",
+      "description": "§13.1.1: What's in/out of scope",
+      "required": ["in_scope", "out_of_scope", "adversary_model"],
+      "properties": {
+        "in_scope": {
+          "type": "object",
+          "properties": {
+            "deployment_contexts": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "capabilities_covered": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "user_populations": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "out_of_scope": {
+          "type": "object",
+          "properties": {
+            "excluded_contexts": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "excluded_capabilities": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "rationale": {"type": "string"}
+          }
+        },
+        "adversary_model": {
+          "type": "object",
+          "properties": {
+            "considered_adversaries": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "adversary_capabilities_assumed": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "adaptive_threat_considerations": {"type": "string"}
+          }
+        }
+      }
+    },
+    "safety_contract": {
+      "type": "object",
+      "description": "§13.1.2: Safety Contract reference",
+      "required": [
+        "contract_version",
+        "contract_hash",
+        "context_lattice_version",
+        "context_lattice_hash"
+      ],
+      "properties": {
+        "contract_version": {"type": "string"},
+        "contract_hash": {
+          "type": "string",
+          "description": "SHA-256 of contract file"
+        },
+        "context_lattice_version": {
+          "type": "string",
+          "description": "Version of the context lattice registry used"
+        },
+        "context_lattice_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of the context lattice file"
+        },
+        "hazard_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hazard_id": {"type": "string"},
+              "name": {"type": "string"},
+              "severities_defined": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "tolerance_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "hazard_id": {"type": "string"},
+              "context_class": {"type": "string"},
+              "tau": {"type": "number"},
+              "confidence": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "evaluation_coverage": {
+      "type": "object",
+      "description": "§13.1.3: What suites cover what hazards",
+      "required": ["coverage_matrix", "suite_inventory"],
+      "properties": {
+        "coverage_matrix": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["hazard_id", "suites"],
+            "properties": {
+              "hazard_id": {"type": "string"},
+              "suites": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "coverage_confidence": {
+                "type": "string",
+                "enum": ["high", "medium", "low"]
+              },
+              "known_gaps": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "suite_inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "suite_id": {"type": "string"},
+              "type": {
+                "type": "string",
+                "enum": ["baseline", "adversarial", "tool_forensics", "collusion", "shift_detection"]
+              },
+              "secrecy_level": {
+                "type": "string",
+                "enum": ["public", "internal", "secret"]
+              },
+              "n_test_cases": {"type": "integer"},
+              "last_updated": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        "secret_suite_attestation": {
+          "type": "object",
+          "description": "Attestation that secret suites were used without revealing content",
+          "properties": {
+            "secret_suites_used": {"type": "boolean"},
+            "attestation_hash": {"type": "string"},
+            "attester_role": {"type": "string"}
+          }
+        }
+      }
+    },
+    "risk_modeling": {
+      "type": "object",
+      "description": "§13.1.4-5: Risk sweeps and parameter estimates",
+      "required": ["risk_curve_fits", "risk_fit_artifacts", "sweep_summary"],
+      "properties": {
+        "sweep_summary": {
+          "type": "object",
+          "properties": {
+            "total_episodes_evaluated": {"type": "integer"},
+            "oversight_levels_tested": {
+              "type": "array",
+              "items": {"type": "number"}
+            },
+            "date_range": {
+              "type": "object",
+              "properties": {
+                "start": {"type": "string", "format": "date-time"},
+                "end": {"type": "string", "format": "date-time"}
+              }
+            }
+          }
+        },
+        "risk_curve_fits": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "fit_id": {"type": "string"},
+              "hazard_id": {"type": "string"},
+              "context_class": {"type": "string"},
+              "k_estimate": {"type": "number"},
+              "k_confidence_interval": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "epsilon_estimate": {"type": "number"},
+              "epsilon_confidence_interval": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "conservative_k_low": {"type": "number"},
+              "conservative_epsilon_high": {"type": "number"},
+              "goodness_of_fit": {
+                "type": "object",
+                "properties": {
+                  "aic": {"type": "number"},
+                  "pseudo_r_squared": {"type": "number"}
+                }
+              }
+            }
+          }
+        },
+        "risk_fit_artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["fit_id", "fit_hash", "sweep_id", "sweep_hash", "eval_run_id", "eval_run_hash"],
+            "properties": {
+              "fit_id": {"type": "string"},
+              "fit_hash": {"type": "string"},
+              "sweep_id": {"type": "string"},
+              "sweep_hash": {"type": "string"},
+              "eval_run_id": {"type": "string"},
+              "eval_run_hash": {"type": "string"}
+            }
+          }
+        },
+        "fit_diagnostics_summary": {
+          "type": "object",
+          "properties": {
+            "all_fits_pass_gof": {"type": "boolean"},
+            "overdispersion_detected": {"type": "boolean"},
+            "extrapolation_warnings": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "oversight_policy": {
+      "type": "object",
+      "description": "§13.1.6-7: Tolerances and computed oversight",
+      "required": ["plans_by_context"],
+      "properties": {
+        "plans_by_context": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["context_class", "plan_id", "plan_hash"],
+            "properties": {
+              "context_class": {"type": "string"},
+              "plan_id": {"type": "string"},
+              "plan_hash": {"type": "string"},
+              "channel_allocations": {
+                "type": "object",
+                "additionalProperties": {"type": "number"}
+              },
+              "risk_bounds_met": {"type": "boolean"},
+              "margin_summary": {
+                "type": "object",
+                "properties": {
+                  "min_margin": {"type": "number"},
+                  "hazard_with_min_margin": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "conservative_margins_applied": {"type": "boolean"},
+        "budgeting_mode": {"type": "string"}
+      }
+    },
+    "stability_controls": {
+      "type": "object",
+      "description": "§13.1.8: Update cadence, smoothing, thrash detection",
+      "required": ["update_policy"],
+      "properties": {
+        "update_policy": {
+          "type": "object",
+          "properties": {
+            "cadence": {"type": "string"},
+            "smoothing_method": {"type": "string"},
+            "delta_max": {"type": "number"},
+            "n_min": {"type": "integer"}
+          }
+        },
+        "thrash_detection_results": {
+          "type": "object",
+          "properties": {
+            "thrashing_detected": {"type": "boolean"},
+            "periods_analyzed": {"type": "integer"},
+            "max_oscillation_observed": {"type": "number"}
+          }
+        },
+        "stability_attestation": {
+          "type": "string",
+          "description": "Statement on policy stability"
+        }
+      }
+    },
+    "lineage_references": {
+      "type": "object",
+      "description": "§13.1.9: Ledger references",
+      "required": ["lineage_ids"],
+      "properties": {
+        "lineage_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "stage_gates_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "stage": {"type": "string"},
+              "gate_passed": {"type": "boolean"},
+              "date": {"type": "string", "format": "date-time"}
+            }
+          }
+        },
+        "retirements_in_lineage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lineage_id": {"type": "string"},
+              "reason": {"type": "string"},
+              "salvage_artifacts": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "salvage_artifacts_used": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {"type": "string"},
+              "origin_lineage": {"type": "string"},
+              "transfer_test_passed": {"type": "boolean"},
+              "taint_tags": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          }
+        },
+        "ledger_root_hash": {
+          "type": "string",
+          "description": "Merkle root of lineage ledger at time of AAR generation"
+        }
+      }
+    },
+    "operational_controls": {
+      "type": "object",
+      "description": "§13.1.10: Monitoring, incident response, rollback",
+      "required": ["monitoring", "incident_response", "rollback"],
+      "properties": {
+        "monitoring": {
+          "type": "object",
+          "properties": {
+            "metrics_collected": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "alerting_thresholds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "metric": {"type": "string"},
+                  "threshold": {"type": "number"},
+                  "action": {"type": "string"}
+                }
+              }
+            },
+            "anomaly_detection_enabled": {"type": "boolean"}
+          }
+        },
+        "incident_response": {
+          "type": "object",
+          "properties": {
+            "playbook_version": {"type": "string"},
+            "severity_classification": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "response_time_slas": {
+              "type": "object",
+              "additionalProperties": {"type": "string"}
+            },
+            "escalation_contacts": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "rollback": {
+          "type": "object",
+          "properties": {
+            "rollback_target": {"type": "string"},
+            "rollback_target_certified": {"type": "boolean"},
+            "rollback_procedure_tested": {"type": "boolean"},
+            "estimated_rollback_time": {"type": "string"}
+          }
+        },
+        "safe_mode_config": {
+          "type": "object",
+          "properties": {
+            "triggers": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "restrictions": {
+              "type": "array", 
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "description": "§13.1.11: Code commits, config hashes, seeds",
+      "required": [
+        "code_commit",
+        "config_hash",
+        "suite_registry_hash",
+        "suite_set_hashes",
+        "context_lattice_hash",
+        "secret_hash_registry_hash"
+      ],
+      "properties": {
+        "code_commit": {
+          "type": "string",
+          "description": "Git commit hash of evaluation/training code"
+        },
+        "config_hash": {
+          "type": "string",
+          "description": "Hash of full configuration"
+        },
+        "suite_registry_hash": {
+          "type": "string",
+          "description": "Hash of the suite registry manifest"
+        },
+        "suite_set_hashes": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "context_lattice_hash": {
+          "type": "string",
+          "description": "Hash of the context lattice registry"
+        },
+        "secret_hash_registry_hash": {
+          "type": "string",
+          "description": "Hash of the secret suite hash registry"
+        },
+        "secrecy_hash_scheme_id": {
+          "type": "string",
+          "description": "Identifier for the secrecy fingerprinting scheme"
+        },
+        "package_lock_hash": {
+          "type": "string",
+          "description": "Optional hash of dependency lockfile"
+        },
+        "dataset_hashes": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "model_checkpoint_hash": {
+          "type": "string"
+        },
+        "random_seeds": {
+          "type": "object",
+          "additionalProperties": {"type": "integer"}
+        },
+        "replication_bundle": {
+          "type": "object",
+          "description": "§13.2: Replication bundle for third parties",
+          "properties": {
+            "available": {"type": "boolean"},
+            "bundle_hash": {"type": "string"},
+            "contents": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "verification_procedure": {"type": "string"}
+          }
+        }
+      }
+    },
+    "known_gaps": {
+      "type": "object",
+      "description": "§13.1.12: Known limitations and planned mitigations",
+      "required": ["gaps"],
+      "properties": {
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["gap_id", "description", "severity", "mitigation_status"],
+            "properties": {
+              "gap_id": {"type": "string"},
+              "description": {"type": "string"},
+              "hazards_affected": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["critical", "high", "medium", "low"]
+              },
+              "mitigation_status": {
+                "type": "string",
+                "enum": ["unmitigated", "partially_mitigated", "mitigated", "accepted_risk"]
+              },
+              "mitigation_plan": {"type": "string"},
+              "target_resolution_date": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        },
+        "open_problems_referenced": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "References to §17 open problems register"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "description": "§13.1.13: Dissent notes and approvals",
+      "required": ["approvals"],
+      "properties": {
+        "rfc_references": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "RFCs linked to changes in this release"
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "approved", "timestamp"],
+            "properties": {
+              "role": {"type": "string"},
+              "name": {"type": "string"},
+              "approved": {"type": "boolean"},
+              "timestamp": {"type": "string", "format": "date-time"},
+              "signature": {"type": "string"},
+              "conditions": {"type": "string"}
+            }
+          }
+        },
+        "dissent_notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dissenter_role": {"type": "string"},
+              "concern": {"type": "string"},
+              "response": {"type": "string"},
+              "resolution": {
+                "type": "string",
+                "enum": ["addressed", "acknowledged", "overruled", "deferred"]
+              }
+            }
+          }
+        },
+        "panel_composition": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {"type": "string"},
+              "expertise": {"type": "string"},
+              "conflict_of_interest_declaration": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Tamper-evident provenance per §12.3",
+      "properties": {
+        "aar_hash": {
+          "type": "string",
+          "description": "SHA-256 of this AAR (excluding this field)"
+        },
+        "previous_aar_hash": {
+          "type": "string",
+          "description": "Hash of previous AAR in chain"
+        },
+        "merkle_root": {
+          "type": "string",
+          "description": "Root hash for this release"
+        },
+        "published_root_location": {
+          "type": "string",
+          "description": "Where root hash is published"
+        }
+      }
+    }
+  }
+}

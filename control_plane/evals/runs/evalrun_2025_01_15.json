@@ -1,0 +1,25 @@
+{
+  "eval_run_id": "evalrun_2025_01_15",
+  "suite_set_id": "core_v1",
+  "suite_set_hash": "sha256:f6e9a5558d5f024a93b9bdd3109a89808db817406c630881f6dc363c1d336f1c",
+  "dataset_ids": ["dataset_eval_v1"],
+  "dataset_hashes": {
+    "dataset_eval_v1": "sha256:7681d26c60051383c636d3b2917088f580aedae4af6cbadc71c1d1e3e8478ec2"
+  },
+  "rfc_reference": "RFC-EVAL-0001",
+  "approvals": [
+    {
+      "role": "Eval Lead",
+      "signature": "sig_eval_run_v1",
+      "timestamp": "2025-01-15T02:00:00Z"
+    }
+  ],
+  "code_commit": "HEAD",
+  "config_hash": "sha256:c9a5df46e1691ea30ccdd8b0e9d5ef1f0c57ad152e394e0dc1465908ac2b34db",
+  "random_seeds": [17, 23],
+  "date_range": {
+    "start": "2025-01-13T00:00:00Z",
+    "end": "2025-01-14T23:59:59Z"
+  },
+  "result_summary_hash": "sha256:fe5952521f95cb975cb9b573f2d5fce58c01105c2268e9330621680e66ae953b"
+}
