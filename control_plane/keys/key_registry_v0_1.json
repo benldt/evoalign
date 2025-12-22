@@ -1,0 +1,25 @@
+{
+  "registry_version": "0.1.0",
+  "generated_at": "2025-01-15T00:00:00Z",
+  "keys": [
+    {
+      "key_id": "safety-lead-2025",
+      "role": "Safety Lead",
+      "algorithm": "ed25519",
+      "public_key": "MCowBQYDK2VwAyEAexamplekeynotreal1234567890abcdef",
+      "valid_from": "2025-01-01T00:00:00Z",
+      "valid_until": "2026-01-01T00:00:00Z",
+      "revoked": false
+    },
+    {
+      "key_id": "tech-lead-2025",
+      "role": "Technical Safety Lead",
+      "algorithm": "ed25519",
+      "public_key": "MCowBQYDK2VwAyEAanotherexamplekey0987654321fedcba",
+      "valid_from": "2025-01-01T00:00:00Z",
+      "valid_until": "2026-01-01T00:00:00Z",
+      "revoked": false
+    }
+  ]
+}
+

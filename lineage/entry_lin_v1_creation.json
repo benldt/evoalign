@@ -1,0 +1,27 @@
+{
+  "entry_id": "entry_lin_v1_001",
+  "lineage_id": "lin_assistant_v1",
+  "entry_type": "creation",
+  "timestamp": "2025-01-10T00:00:00Z",
+  "stage": "dev",
+  "gate_evidence": {
+    "aar_id": "aar_v0_1",
+    "aar_hash": "sha256:placeholder_initial",
+    "suite_results_summary": {
+      "suites_passed": 3,
+      "suites_total": 3,
+      "tolerances_met": true
+    }
+  },
+  "provenance": {
+    "rfc_reference": "RFC-LIN-0001",
+    "approvals": [
+      {
+        "role": "Technical Safety Lead",
+        "signature": "sig_lineage_create_001",
+        "timestamp": "2025-01-10T00:00:00Z"
+      }
+    ]
+  }
+}
+

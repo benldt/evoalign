@@ -21,7 +21,7 @@ jobs:
   # Schema Validation
   # ===========================================================================
   schema-validation:
-    name: Validate JSON Schemas
+    name: Validate Schemas + Data
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,106 +34,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install jsonschema pyyaml
-          
-      - name: Validate schema syntax
+
+      - name: Validate schemas and data files
         run: |
-          python -c "
-          import json
-          from pathlib import Path
-          from jsonschema import Draft202012Validator
-          
-          schemas_dir = Path('schemas')
-          errors = []
-          
-          for schema_file in schemas_dir.glob('*.schema.json'):
-              print(f'Validating {schema_file}...')
-              try:
-                  with open(schema_file) as f:
-                      schema = json.load(f)
-                  Draft202012Validator.check_schema(schema)
-                  print(f'  ✓ Valid')
-              except Exception as e:
-                  print(f'  ✗ Invalid: {e}')
-                  errors.append((schema_file, str(e)))
-                  
-          if errors:
-              print(f'\\n{len(errors)} schema(s) invalid')
-              exit(1)
-          print(f'\\nAll schemas valid')
-          "
-          
-      - name: Validate data files against schemas
-        run: |
-          python -c "
-          import json
-          import yaml
-          from pathlib import Path
-          from jsonschema import validate, ValidationError
-          
-          SCHEMA_TARGETS = [
-              {'path': 'contracts/safety_contracts', 'schema': 'SafetyContract.schema.json', 'allow_yaml': True},
-              {'path': 'contracts/context_lattice', 'schema': 'ContextLattice.schema.json', 'allow_yaml': True},
-              {'path': 'control_plane/governor/risk_fits', 'schema': 'RiskCurveFit.schema.json'},
-              {'path': 'control_plane/governor/oversight_plans', 'schema': 'OversightPlan.schema.json'},
-              {'path': 'control_plane/governor/sweeps', 'schema': 'RiskSweepManifest.schema.json'},
-              {'path': 'control_plane/evals/suites/registry.json', 'schema': 'SuiteRegistry.schema.json', 'single_file': True},
-              {'path': 'control_plane/evals/suites/hash_registries', 'schema': 'SecretSuiteHashRegistry.schema.json'},
-              {'path': 'control_plane/evals/suites/sets', 'schema': 'SuiteSet.schema.json'},
-              {'path': 'control_plane/evals/runs', 'schema': 'EvalRunManifest.schema.json'},
-              {'path': 'control_plane/evals/datasets/manifests', 'schema': 'DatasetManifest.schema.json'},
-              {'path': 'control_plane/ledger', 'schema': 'LineageLedgerEntry.schema.json'},
-              {'path': 'culture/chronicle', 'schema': 'ChronicleEntry.schema.json'},
-          ]
-          
-          errors = []
-          
-          def validate_file(schema, data_file, loader):
-              print(f'Validating {data_file}...')
-              try:
-                  with open(data_file) as f:
-                      data = loader(f)
-                  validate(instance=data, schema=schema)
-                  print(f'  ✓ Valid')
-              except ValidationError as e:
-                  print(f'  ✗ Invalid: {e.message}')
-                  errors.append((data_file, e.message))
-              except Exception as e:
-                  print(f'  ✗ Error: {e}')
-                  errors.append((data_file, str(e)))
-          
-          for target in SCHEMA_TARGETS:
-              data_path = Path(target['path'])
-              schema_path = Path('schemas') / target['schema']
-              
-              if not data_path.exists():
-                  print(f\"Skipping {target['path']} (not found)\")
-                  continue
-                  
-              if not schema_path.exists():
-                  print(f\"Warning: Schema {target['schema']} not found\")
-                  continue
-                  
-              with open(schema_path) as f:
-                  schema = json.load(f)
-              
-              if data_path.is_file():
-                  validate_file(schema, data_path, json.load)
-                  continue
-              
-              for data_file in data_path.rglob('*.json'):
-                  validate_file(schema, data_file, json.load)
-              
-              if target.get('allow_yaml'):
-                  for data_file in data_path.rglob('*.yaml'):
-                      validate_file(schema, data_file, yaml.safe_load)
-                  for data_file in data_path.rglob('*.yml'):
-                      validate_file(schema, data_file, yaml.safe_load)
-                          
-          if errors:
-              print(f'\\n{len(errors)} validation error(s)')
-              exit(1)
-          print('\\nAll data files valid')
-          "
+          python ci/invariants/schema_validation.py --repo-root .
 
   # ===========================================================================
   # Core Invariant Checks

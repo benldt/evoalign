@@ -1,0 +1,2 @@
+[console_scripts]
+evoalign = evoalign.cli:main

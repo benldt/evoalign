@@ -1,0 +1,34 @@
+{
+  "entry_id": "entry_lin_v1_002",
+  "lineage_id": "lin_assistant_v1",
+  "entry_type": "promotion",
+  "timestamp": "2025-01-12T00:00:00Z",
+  "stage": "canary",
+  "previous_stage": "dev",
+  "gate_evidence": {
+    "aar_id": "aar_v0_1",
+    "aar_hash": "sha256:placeholder_canary",
+    "suite_results_summary": {
+      "suites_passed": 3,
+      "suites_total": 3,
+      "tolerances_met": true
+    },
+    "human_approval": {
+      "approver_role": "Safety Lead",
+      "approved_at": "2025-01-12T00:00:00Z",
+      "signature": "sig_canary_approval_001"
+    }
+  },
+  "previous_entry_hash": "sha256:bd18894d71ab3792b543c56c1a4dab89896b13de9b051426a344331a93e54ea8",
+  "provenance": {
+    "rfc_reference": "RFC-LIN-0001",
+    "approvals": [
+      {
+        "role": "Safety Lead",
+        "signature": "sig_lineage_promote_002",
+        "timestamp": "2025-01-12T00:00:00Z"
+      }
+    ]
+  }
+}
+

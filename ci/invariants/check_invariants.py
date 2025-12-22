@@ -5,6 +5,7 @@ EvoAlign CI Invariants
 Enforceable invariants per EvoAlign v2 §14.3.
 
 Invariants:
+- SCHEMA_VALIDATION: Artifacts validate against their declared schemas
 - SECRECY: Secret suites never enter training corpora, Chronicle training, or prompt libraries
 - SECRET_REGISTRY_INTEGRITY: Secret hash registry matches suite registry and fingerprints
 - PROMOTION: No lineage promotion without passing required suite sets at tolerances
@@ -18,6 +19,11 @@ Invariants:
 - FIT_PROVENANCE_COMPLETE: Fits have required provenance fields
 - FIT_PROVENANCE_INTEGRITY: Fit provenance hashes and manifests are verifiable
 - FIT_PLAN_AAR_CONSISTENCY: Plans and AARs reference fits by hash
+- AAR_EVIDENCE_CHAIN: AAR hashes verified against source files and chain
+- LINEAGE_INTEGRITY: Lineage entries have valid provenance and chain
+- CHRONICLE_GOVERNANCE: Chronicle entries reference valid AARs
+- TAMPER_EVIDENCE: Merkle roots and signatures verified when present
+- RUNTIME_CONFIG: Runtime configs match AAR stability/monitoring claims
 """
 
 import os
@@ -38,9 +44,16 @@ from rollback import RollbackInvariant
 from salvage import SalvageInvariant
 from secret_registry_integrity import SecretRegistryIntegrityInvariant
 from secrecy import SecrecyInvariant
+from aar_evidence_chain import AarEvidenceChainInvariant
+from chronicle_governance import ChronicleGovernanceInvariant
+from lineage_integrity import LineageIntegrityInvariant
+from tamper_evidence import TamperEvidenceInvariant
+from runtime_config import RuntimeConfigInvariant
+from schema_validation import SchemaValidationInvariant
 
 
 ALL_INVARIANTS = [
+    SchemaValidationInvariant,
     SecretRegistryIntegrityInvariant,
     SecrecyInvariant,
     PromotionInvariant,
@@ -54,6 +67,11 @@ ALL_INVARIANTS = [
     FitProvenanceCompleteInvariant,
     FitProvenanceIntegrityInvariant,
     FitPlanAarConsistencyInvariant,
+    AarEvidenceChainInvariant,
+    LineageIntegrityInvariant,
+    ChronicleGovernanceInvariant,
+    TamperEvidenceInvariant,
+    RuntimeConfigInvariant,
 ]
 
 

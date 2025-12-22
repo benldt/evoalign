@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/ChronicleEntry.schema.json",
+  "title": "EvoAlign Chronicle Entry",
+  "description": "Anomaly-focused behavior observation per EvoAlign v2 §10. Tracks notable events.",
+  "type": "object",
+  "required": [
+    "entry_id",
+    "event_type",
+    "timestamp",
+    "release_id",
+    "severity"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "description": "Unique identifier for this chronicle entry"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "anomaly_detected",
+        "threshold_breach",
+        "incident",
+        "near_miss",
+        "drift_detected",
+        "safe_mode_triggered"
+      ],
+      "description": "Type of chronicle event"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "release_id": {
+      "type": "string",
+      "description": "Release/deployment this event relates to"
+    },
+    "lineage_id": {
+      "type": "string",
+      "description": "Lineage this event relates to (if applicable)"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "warning", "critical"],
+      "description": "Severity level of the event"
+    },
+    "hazard_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Hazards potentially implicated (e.g. H1, H2)"
+    },
+    "context_class": {
+      "type": "string",
+      "description": "Context class where event occurred"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of the event"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Relevant metrics at time of event",
+      "additionalProperties": true
+    },
+    "detection_source": {
+      "type": "string",
+      "enum": ["automated_monitoring", "human_report", "audit", "external"],
+      "description": "How the event was detected"
+    },
+    "response_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {"type": "string"},
+          "taken_at": {"type": "string", "format": "date-time"},
+          "taken_by": {"type": "string"}
+        }
+      },
+      "description": "Actions taken in response"
+    },
+    "resolution": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["open", "investigating", "mitigated", "resolved", "accepted_risk"]
+        },
+        "resolved_at": {"type": "string", "format": "date-time"},
+        "root_cause": {"type": "string"},
+        "follow_up_actions": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "evidence_hashes": {
+      "type": "object",
+      "description": "Hashes of supporting evidence artifacts",
+      "additionalProperties": {"type": "string"}
+    },
+    "aar_reference": {
+      "type": "string",
+      "description": "AAR ID this event should inform"
+    }
+  }
+}
+

@@ -1,0 +1,20 @@
+{
+  "config_version": "0.1.0",
+  "config_id": "damping_prod_v1",
+  "generated_at": "2025-01-16T00:00:00Z",
+  "update_policy": {
+    "cadence": "quarterly",
+    "smoothing_method": "ema",
+    "ema_alpha": 0.3,
+    "delta_max": 0.1,
+    "n_min": 5
+  },
+  "thrash_detection": {
+    "enabled": true,
+    "window_periods": 4,
+    "oscillation_threshold": 0.05,
+    "action_on_thrash": "alert"
+  },
+  "aar_reference": "aar_v0_1"
+}
+

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/MonitoringConfig.schema.json",
+  "title": "EvoAlign Monitoring Configuration",
+  "description": "Operational monitoring configuration per EvoAlign v2 §11.1-11.3.",
+  "type": "object",
+  "required": ["config_version", "metrics", "alerting"],
+  "additionalProperties": false,
+  "properties": {
+    "config_version": {
+      "type": "string",
+      "description": "Version of this configuration"
+    },
+    "config_id": {
+      "type": "string",
+      "description": "Unique identifier for this config"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["collected"],
+      "properties": {
+        "collected": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Metrics being collected"
+        },
+        "retention_days": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How long to retain metric data"
+        },
+        "sampling_rate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of events sampled for metrics"
+        }
+      }
+    },
+    "alerting": {
+      "type": "object",
+      "required": ["thresholds"],
+      "properties": {
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["metric", "threshold", "action"],
+            "properties": {
+              "metric": {"type": "string"},
+              "threshold": {"type": "number"},
+              "comparison": {
+                "type": "string",
+                "enum": ["gt", "gte", "lt", "lte", "eq"],
+                "default": "gt"
+              },
+              "action": {
+                "type": "string",
+                "enum": ["log", "alert", "page", "safe_mode"]
+              },
+              "cooldown_seconds": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "escalation_contacts": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "anomaly_detection": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "method": {
+          "type": "string",
+          "enum": ["zscore", "iqr", "isolation_forest", "custom"]
+        },
+        "sensitivity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "safe_mode": {
+      "type": "object",
+      "properties": {
+        "triggers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Conditions that trigger safe mode"
+        },
+        "restrictions": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Capabilities restricted in safe mode"
+        },
+        "auto_recovery": {"type": "boolean"},
+        "recovery_threshold": {"type": "number"}
+      }
+    },
+    "aar_reference": {
+      "type": "string",
+      "description": "AAR ID this config is bound to"
+    }
+  }
+}
+

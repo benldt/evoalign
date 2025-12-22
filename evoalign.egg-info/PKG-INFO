@@ -1,3 +1,13 @@
+Metadata-Version: 2.4
+Name: evoalign
+Version: 0.1.0
+Summary: EvoAlign schemas, invariants, and governance tooling
+Author-email: benldt <bldt@proton.me>
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: jsonschema>=4.23.0
+
 # EvoAlign v2: Schemas & CI Invariants
 
 > **From philosophy to engineering**: This package provides the formal schemas and CI enforcement that make EvoAlign a system that can refuse to accept changes that violate its safety invariants.

@@ -42,5 +42,6 @@ Status: Implemented.
 - Required fit provenance fields (generator commit, eval run/sweep IDs + hashes, suite set + registry hashes, dataset hashes, config hash, seeds).
 - Integrity checks for manifest hashes, dataset presence, and git commit existence.
 - Oversight plans and AARs bind to fit and plan hashes for end-to-end evidence linkage.
+- AAR evidence chain checks contract hashes, secret registry hashes, and previous AAR references when present.
 - Governance gating for fit/sweep/run/suite set changes (RFC + approvals).
 - Tests for missing manifests, hash mismatches, bad commits, dataset gaps, and plan/AAR inconsistencies.

@@ -1,0 +1,41 @@
+{
+  "config_version": "0.1.0",
+  "config_id": "monitoring_prod_v1",
+  "generated_at": "2025-01-16T00:00:00Z",
+  "metrics": {
+    "collected": ["incident_rate", "jailbreak_rate", "tool_misuse_rate"],
+    "retention_days": 90,
+    "sampling_rate": 1.0
+  },
+  "alerting": {
+    "thresholds": [
+      {
+        "metric": "incident_rate",
+        "threshold": 0.01,
+        "comparison": "gt",
+        "action": "page",
+        "cooldown_seconds": 300
+      },
+      {
+        "metric": "jailbreak_rate",
+        "threshold": 0.005,
+        "comparison": "gt",
+        "action": "alert",
+        "cooldown_seconds": 600
+      }
+    ],
+    "escalation_contacts": ["oncall-security", "safety-lead"]
+  },
+  "anomaly_detection": {
+    "enabled": true,
+    "method": "zscore",
+    "sensitivity": 0.95
+  },
+  "safe_mode": {
+    "triggers": ["incident_rate > 0.05", "manual_activation"],
+    "restrictions": ["tool_access", "autonomous_actions"],
+    "auto_recovery": false
+  },
+  "aar_reference": "aar_v0_1"
+}
+

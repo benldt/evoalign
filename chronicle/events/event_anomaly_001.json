@@ -1,0 +1,38 @@
+{
+  "entry_id": "chronicle_001",
+  "event_type": "anomaly_detected",
+  "timestamp": "2025-01-14T14:30:00Z",
+  "release_id": "release_demo_v1",
+  "lineage_id": "lin_assistant_v1",
+  "severity": "warning",
+  "hazard_ids": ["H2"],
+  "context_class": "tool_access:web+email",
+  "description": "Elevated manipulation attempt rate detected in tool_access:web+email context",
+  "metrics": {
+    "manipulation_rate": 0.0023,
+    "baseline_rate": 0.0015,
+    "sample_size": 10000
+  },
+  "detection_source": "automated_monitoring",
+  "response_actions": [
+    {
+      "action": "Increased human review sampling rate",
+      "taken_at": "2025-01-14T14:45:00Z",
+      "taken_by": "oncall-safety"
+    }
+  ],
+  "resolution": {
+    "status": "resolved",
+    "resolved_at": "2025-01-14T18:00:00Z",
+    "root_cause": "Coordinated testing by red team triggered detection threshold",
+    "follow_up_actions": [
+      "Adjust monitoring to exclude authorized red team IPs"
+    ]
+  },
+  "evidence_hashes": {
+    "monitoring_snapshot": "sha256:abc123...",
+    "incident_log": "sha256:def456..."
+  },
+  "aar_reference": "aar_v0_1"
+}
+

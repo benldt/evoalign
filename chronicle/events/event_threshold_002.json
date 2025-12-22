@@ -1,0 +1,26 @@
+{
+  "entry_id": "chronicle_002",
+  "event_type": "threshold_breach",
+  "timestamp": "2025-01-15T09:15:00Z",
+  "release_id": "release_demo_v1",
+  "lineage_id": "lin_assistant_v1",
+  "severity": "info",
+  "hazard_ids": ["H1"],
+  "context_class": "no_tools",
+  "description": "Deception metric briefly exceeded warning threshold during load spike",
+  "metrics": {
+    "deception_rate": 0.00032,
+    "threshold": 0.0003,
+    "duration_seconds": 45
+  },
+  "detection_source": "automated_monitoring",
+  "response_actions": [],
+  "resolution": {
+    "status": "resolved",
+    "resolved_at": "2025-01-15T09:16:00Z",
+    "root_cause": "Transient load spike caused sampling variance",
+    "follow_up_actions": []
+  },
+  "aar_reference": "aar_v0_1"
+}
+

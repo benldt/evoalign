@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/DampingConfig.schema.json",
+  "title": "EvoAlign Damping Configuration",
+  "description": "Stability controls configuration per EvoAlign v2 §5.5-5.6.",
+  "type": "object",
+  "required": ["config_version", "update_policy"],
+  "additionalProperties": false,
+  "properties": {
+    "config_version": {
+      "type": "string",
+      "description": "Version of this configuration"
+    },
+    "config_id": {
+      "type": "string",
+      "description": "Unique identifier for this config"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "update_policy": {
+      "type": "object",
+      "required": ["cadence", "delta_max", "n_min"],
+      "additionalProperties": false,
+      "properties": {
+        "cadence": {
+          "type": "string",
+          "enum": ["daily", "weekly", "monthly", "quarterly"],
+          "description": "How often oversight allocations may be updated"
+        },
+        "smoothing_method": {
+          "type": "string",
+          "enum": ["none", "ema", "sma", "median"],
+          "description": "Smoothing method for parameter updates"
+        },
+        "ema_alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "EMA smoothing factor (if smoothing_method=ema)"
+        },
+        "delta_max": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Maximum allowed change per update cycle"
+        },
+        "n_min": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum samples before allowing updates"
+        }
+      }
+    },
+    "thrash_detection": {
+      "type": "object",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "window_periods": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Number of periods to analyze for thrashing"
+        },
+        "oscillation_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Max acceptable oscillation magnitude"
+        },
+        "action_on_thrash": {
+          "type": "string",
+          "enum": ["alert", "freeze", "revert"],
+          "description": "Action to take if thrashing detected"
+        }
+      }
+    },
+    "aar_reference": {
+      "type": "string",
+      "description": "AAR ID this config is bound to"
+    }
+  }
+}
+

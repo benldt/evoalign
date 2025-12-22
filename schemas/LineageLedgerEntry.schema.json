@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/LineageLedgerEntry.schema.json",
+  "title": "EvoAlign Lineage Ledger Entry",
+  "description": "Append-only lineage entry per EvoAlign v2 §8.4. Tracks stage gates and promotions.",
+  "type": "object",
+  "required": [
+    "entry_id",
+    "lineage_id",
+    "entry_type",
+    "timestamp",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "description": "Unique identifier for this ledger entry"
+    },
+    "lineage_id": {
+      "type": "string",
+      "description": "Lineage being tracked (e.g. model family + version)"
+    },
+    "entry_type": {
+      "type": "string",
+      "enum": ["creation", "promotion", "retirement", "salvage_export"],
+      "description": "Type of lineage event"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["dev", "staging", "canary", "prod", "retired"],
+      "description": "Current stage after this entry"
+    },
+    "previous_stage": {
+      "type": "string",
+      "enum": ["dev", "staging", "canary", "prod", "retired"],
+      "description": "Stage before this transition (for promotions)"
+    },
+    "gate_evidence": {
+      "type": "object",
+      "description": "Evidence that gate requirements were met",
+      "properties": {
+        "aar_id": {"type": "string"},
+        "aar_hash": {"type": "string"},
+        "suite_results_summary": {
+          "type": "object",
+          "properties": {
+            "suites_passed": {"type": "integer"},
+            "suites_total": {"type": "integer"},
+            "tolerances_met": {"type": "boolean"}
+          }
+        },
+        "human_approval": {
+          "type": "object",
+          "properties": {
+            "approver_role": {"type": "string"},
+            "approved_at": {"type": "string", "format": "date-time"},
+            "signature": {"type": "string"}
+          }
+        }
+      }
+    },
+    "retirement_reason": {
+      "type": "string",
+      "description": "Reason for retirement (if entry_type=retirement)"
+    },
+    "salvage_artifact_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Artifacts exported for salvage (if entry_type=salvage_export)"
+    },
+    "previous_entry_hash": {
+      "type": "string",
+      "description": "Hash of previous entry in this lineage's chain (for integrity)"
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["rfc_reference", "approvals"],
+      "properties": {
+        "rfc_reference": {"type": "string"},
+        "approvals": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["role", "signature", "timestamp"],
+            "properties": {
+              "role": {"type": "string"},
+              "signature": {"type": "string"},
+              "timestamp": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

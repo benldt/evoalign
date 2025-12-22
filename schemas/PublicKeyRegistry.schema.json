@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evoalign.org/schemas/PublicKeyRegistry.schema.json",
+  "title": "EvoAlign Public Key Registry",
+  "description": "Registry of public keys for signature verification per EvoAlign v2 §12.3.",
+  "type": "object",
+  "required": ["registry_version", "keys"],
+  "additionalProperties": false,
+  "properties": {
+    "registry_version": {
+      "type": "string",
+      "description": "Version of this registry"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "keys": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/PublicKeyEntry"}
+    }
+  },
+  "$defs": {
+    "PublicKeyEntry": {
+      "type": "object",
+      "required": ["key_id", "role", "algorithm", "public_key"],
+      "additionalProperties": false,
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "description": "Unique identifier for this key"
+        },
+        "role": {
+          "type": "string",
+          "description": "Role authorized to use this key (e.g., Safety Lead)"
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": ["ed25519", "rsa-sha256", "ecdsa-p256"],
+          "description": "Signature algorithm"
+        },
+        "public_key": {
+          "type": "string",
+          "description": "Base64-encoded public key or PEM block"
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "revoked": {
+          "type": "boolean",
+          "default": false
+        },
+        "revocation_reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
+

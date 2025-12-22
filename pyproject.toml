@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evoalign"
+version = "0.1.0"
+description = "Alignment governance system with auditable safety contracts"
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "benldt", email = "bldt@proton.me" }]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "pyyaml>=6.0",
+  "jsonschema>=4.23.0",
+]
+
+[project.scripts]
+evoalign = "evoalign.cli:main"
+
+[tool.setuptools]
+packages = ["evoalign"]
