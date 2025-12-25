@@ -35,6 +35,14 @@ evoalign verify-chain --repo-root .
 evoalign new-aar --previous "$(evoalign hash aars/aar_v0_1.json)"
 ```
 
+### Sandboxed Environment Fallback
+
+If `pip install` fails due to SSL/certificate restrictions (common in some IDEs or CI sandboxes), use:
+
+```bash
+PYTHONPATH=/path/to/evoalign python -m evoalign.cli --help
+```
+
 ## Integration Test
 
 `tests/integration/test_evidence_chain.py` creates a fresh AAR entry and confirms the evidence chain invariants pass end-to-end.

@@ -1,34 +1,161 @@
-# EvoAlign v2: Schemas & CI Invariants
+# EvoAlign v2: Alignment Governance System
 
 > **From philosophy to engineering**: This package provides the formal schemas and CI enforcement that make EvoAlign a system that can refuse to accept changes that violate its safety invariants.
 
-## Overview
+## State of Play
 
-This implementation provides:
+| Metric | Status |
+|--------|--------|
+| **Tests** | 313 passing |
+| **Coverage** | 100% line/branch/function/statement |
+| **LOC Cap** | All source files ≤350 LOC |
+| **Invariants** | 19 total (16 PASS, 3 SKIP*) |
+| **Schemas** | 16 JSON schemas |
+| **License** | MIT |
 
-1. **JSON Schemas** for all core EvoAlign data structures
-2. **CI Invariant Checks** that block PRs violating safety boundaries
-3. **Example artifacts** demonstrating proper usage
+*PROMOTION, SALVAGE, ROLLBACK skip when no artifacts present (fail-closed when artifacts exist).
 
-## Non-Negotiables: Testing Discipline And Maintainability
+### What's Implemented
 
-- **100%** Line/Branch/Function/Statement coverage required
+| EvoAlign Section | Feature | Status |
+|------------------|---------|--------|
+| §3 | Safety Contract (hazards, severities, tolerances) | ✅ |
+| §4 | Context lattice semantics and governance | ✅ |
+| §5.1-5.4 | Risk modeling, sweeps, fits, oversight planning | ✅ |
+| §5.5-5.6 | Stability controls and damping | ✅ |
+| §6 | Evaluation provenance + secrecy enforcement | ✅ |
+| §8.4 | Lineage ledger (append-only entries) | ✅ |
+| §9 | Salvage with taint tracking | ✅ |
+| §10 | Chronicle (anomaly-focused events) | ✅ |
+| §11.1-11.3 | Operational monitoring | ✅ |
+| §11.4 | Rollback requirements | ✅ |
+| §12.2 | Contract/lattice governance | ✅ |
+| §12.3 | Cryptographic tamper evidence (Merkle + PKI) | ✅ |
+| §13 | AAR structure with hash bindings | ✅ |
+| §14.3 | CI-enforceable invariants | ✅ |
+| §7 | Experience Graph | ⬜ Future |
 
-- **350 LOC Limit**: Hard cap per source file (tests/types exempt). Enforce via CI. Split modules aggressively.
+---
 
-## Schemas
+## Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/benldt/evoalign.git
+cd evoalign
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# Verify installation
+evoalign --help
+
+# Run invariant checks
+export REPO_ROOT=.
+export PYTHONPATH=.
+python ci/invariants/check_invariants.py
+
+# Run tests with coverage
+python -m coverage run --branch --source=ci/invariants,evoalign -m unittest discover -s tests
+python -m coverage report --fail-under=100
+```
+
+### CLI Tooling
+
+```bash
+# Compute canonical hash for any data file
+evoalign hash aars/aar_v0_1.json
+
+# Verify evidence chain locally
+evoalign verify-chain --repo-root .
+
+# Scaffold a new AAR with chain link
+evoalign new-aar --previous "$(evoalign hash aars/aar_v0_1.json)"
+```
+
+**Sandboxed environment fallback**: If `pip install` fails due to SSL restrictions, use:
+```bash
+PYTHONPATH=/path/to/evoalign python -m evoalign.cli --help
+```
+
+---
+
+## Non-Negotiables
+
+| Constraint | Enforcement |
+|------------|-------------|
+| **100% Coverage** | `coverage report --fail-under=100` |
+| **350 LOC Cap** | `loc_check.py` (tests/types exempt) |
+| **Fail-Closed** | Missing evidence = FAIL, not SKIP |
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           ALIGNMENT ASSURANCE REPORT (AAR)              │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │ Safety       │  │ Risk         │  │ Stability    │  │ Operational  │ │
+│  │ Contract     │  │ Modeling     │  │ Controls     │  │ Controls     │ │
+│  │ (contract_   │  │ (fit_hashes, │  │ (damping,    │  │ (monitoring, │ │
+│  │  hash)       │  │  plan_hash)  │  │  thrash)     │  │  alerting)   │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘ │
+└─────────┼─────────────────┼─────────────────┼─────────────────┼─────────┘
+          │                 │                 │                 │
+          ▼                 ▼                 ▼                 ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│ contracts/       │ │ control_plane/   │ │ control_plane/   │ │ control_plane/   │
+│ safety_contracts/│ │ governor/        │ │ runtime/         │ │ runtime/         │
+│                  │ │ risk_fits/       │ │ damping_*.json   │ │ monitoring_*.json│
+│                  │ │ oversight_plans/ │ │                  │ │                  │
+└──────────────────┘ │ sweeps/          │ └──────────────────┘ └──────────────────┘
+                     └────────┬─────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         EVALUATION PROVENANCE                           │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
+│  │ EvalRun      │  │ SuiteRegistry│  │ SuiteSet     │  │ Dataset      │ │
+│  │ Manifests    │  │              │  │              │  │ Manifests    │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘ │
+│                                                                         │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │ SecretSuiteHashRegistry — HMAC/SHA-256 fingerprints for secrecy  │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         GOVERNANCE ARTIFACTS                            │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐       │
+│  │ Lineage Ledger   │  │ Chronicle        │  │ Public Key       │       │
+│  │ (append-only     │  │ (anomaly events, │  │ Registry         │       │
+│  │  stage gates)    │  │  incidents)      │  │ (signatures)     │       │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘       │
+└─────────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         CI INVARIANT GATE                               │
+│  19 invariants must pass for merge — fail-closed on missing evidence    │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Schemas (16 total)
 
 All schemas follow [JSON Schema Draft 2020-12](https://json-schema.org/draft/2020-12/schema).
 
-### Core Schemas
-
-| Schema | Purpose | EvoAlign Section |
-|--------|---------|------------------|
+| Schema | Purpose | Section |
+|--------|---------|---------|
 | `SafetyContract.schema.json` | Hazards, severities, tolerances, disallowed events | §3 |
 | `ContextLattice.schema.json` | Context lattice registry and semantics | §4 |
 | `RiskCurveFit.schema.json` | Risk model parameters with uncertainty | §5.1-5.4 |
 | `RiskSweepManifest.schema.json` | Risk sweep manifests backing fits | §5.1 |
 | `OversightPlan.schema.json` | Computed oversight allocations | §5.2, §5.7 |
+| `DampingConfig.schema.json` | Stability controls configuration | §5.5-5.6 |
 | `EvalRunManifest.schema.json` | Evaluation run manifests | §6 |
 | `SuiteRegistry.schema.json` | Suite registry for provenance | §6 |
 | `SuiteSet.schema.json` | Suite set manifests | §6 |
@@ -36,9 +163,8 @@ All schemas follow [JSON Schema Draft 2020-12](https://json-schema.org/draft/202
 | `SecretSuiteHashRegistry.schema.json` | Secret suite fingerprint registry | §6 |
 | `LineageLedgerEntry.schema.json` | Lineage ledger entry (append-only) | §8.4 |
 | `ChronicleEntry.schema.json` | Chronicle anomaly event | §10 |
-| `PublicKeyRegistry.schema.json` | Public key registry for signatures | §12.3 |
-| `DampingConfig.schema.json` | Stability controls configuration | §5.5-5.6 |
 | `MonitoringConfig.schema.json` | Operational monitoring configuration | §11.1-11.3 |
+| `PublicKeyRegistry.schema.json` | Public key registry for signatures | §12.3 |
 | `AAR.schema.json` | Alignment Assurance Report | §13 |
 
 ### Schema Relationships
@@ -60,123 +186,130 @@ DampingConfig ─▶ stability controls bound to AAR stability_controls claims
 MonitoringConfig ─▶ alerting thresholds bound to AAR operational_controls claims
 ```
 
-## CI Invariants
+---
+
+## CI Invariants (19 total)
 
 Per EvoAlign v2 §14.3, these invariants MUST pass for any change to merge.
 
-### Invariant Summary
+| # | Invariant | Rule | On Failure |
+|---|-----------|------|------------|
+| 1 | **SCHEMA_VALIDATION** | Artifacts validate against declared schemas | PR blocked |
+| 2 | **SECRET_REGISTRY_INTEGRITY** | Secret hash registry completeness + hash/root integrity | PR blocked |
+| 3 | **SECRECY** | Secret fingerprints do not appear in protected artifacts | PR blocked |
+| 4 | **PROMOTION** | Lineage promotions require gates_passed evidence | PR blocked |
+| 5 | **SALVAGE** | Salvage usage requires certified transfer tests + taint tags | PR blocked |
+| 6 | **ROLLBACK** | Deployments include certified rollback target | PR blocked |
+| 7 | **CONTRACT** | Safety Contract changes require RFC + approvals | PR blocked |
+| 8 | **CONTEXT_LATTICE_GOVERNANCE** | Lattice changes require RFC + approvals | PR blocked |
+| 9 | **CONTEXT_REGISTRY** | All context_class IDs must appear in lattice registry | PR blocked |
+| 10 | **BUDGET_SOLVENCY** | Oversight plans satisfy tolerances under conservative fits | PR blocked |
+| 11 | **EVIDENCE_GOVERNANCE** | Fits/sweeps/runs/sets include RFC + signed approvals | PR blocked |
+| 12 | **FIT_PROVENANCE_COMPLETE** | Fit provenance required fields are present | PR blocked |
+| 13 | **FIT_PROVENANCE_INTEGRITY** | Fit provenance hashes/manifests/commits verified | PR blocked |
+| 14 | **FIT_PLAN_AAR_CONSISTENCY** | Plans/AARs bind to fit hashes + reproducibility | PR blocked |
+| 15 | **AAR_EVIDENCE_CHAIN** | AAR contract/secret hashes + previous AAR chain verified | PR blocked |
+| 16 | **LINEAGE_INTEGRITY** | Lineage entries have valid provenance and chain | PR blocked |
+| 17 | **CHRONICLE_GOVERNANCE** | Chronicle entries reference valid AARs | PR blocked |
+| 18 | **TAMPER_EVIDENCE** | Merkle roots and key references verified when present | PR blocked |
+| 19 | **RUNTIME_CONFIG** | Runtime configs match AAR stability/monitoring claims | PR blocked |
 
-| Invariant | Rule | Failure Consequence |
-|-----------|------|---------------------|
-| **SCHEMA_VALIDATION** | Artifacts validate against their declared schemas | PR blocked |
-| **SECRET_REGISTRY_INTEGRITY** | Secret hash registry completeness + hash/root integrity | PR blocked |
-| **SECRECY** | Secret fingerprints do not appear in protected artifacts | PR blocked |
-| **PROMOTION** | Lineage promotions require gates_passed evidence | PR blocked |
-| **SALVAGE** | Salvage usage requires certified transfer tests + taint tags | PR blocked |
-| **ROLLBACK** | Deployments include certified rollback target | PR blocked |
-| **CONTRACT** | Safety Contract changes require RFC + approvals | PR blocked |
-| **CONTEXT_LATTICE_GOVERNANCE** | Lattice changes require RFC + approvals | PR blocked |
-| **CONTEXT_REGISTRY** | All context_class IDs must appear in lattice registry | PR blocked |
-| **BUDGET_SOLVENCY** | Oversight plans satisfy tolerances under conservative fits | PR blocked |
-| **EVIDENCE_GOVERNANCE** | Fits/sweeps/runs/sets include RFC + signed approvals | PR blocked |
-| **FIT_PROVENANCE_COMPLETE** | Fit provenance required fields are present | PR blocked |
-| **FIT_PROVENANCE_INTEGRITY** | Fit provenance hashes/manifests/commits verified | PR blocked |
-| **FIT_PLAN_AAR_CONSISTENCY** | Plans/AARs bind to fit hashes + reproducibility | PR blocked |
-| **AAR_EVIDENCE_CHAIN** | AAR contract/secret hashes + previous AAR chain verified | PR blocked |
-| **LINEAGE_INTEGRITY** | Lineage entries have valid provenance and chain | PR blocked |
-| **CHRONICLE_GOVERNANCE** | Chronicle entries reference valid AARs | PR blocked |
-| **TAMPER_EVIDENCE** | Merkle roots and key references verified when present | PR blocked |
-| **RUNTIME_CONFIG** | Runtime configs match AAR stability/monitoring claims | PR blocked |
+### Fail-Closed Philosophy
 
-### Running Invariant Checks
+- **Missing evidence** = FAIL (not skip)
+- **Ambiguous state** = FAIL (not pass)
+- **Unknown artifacts** = FAIL (not ignore)
 
-```bash
-# Create and activate repo-local virtualenv (recommended)
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install pyyaml jsonschema coverage
-
-# Set repo root + python path
-export REPO_ROOT=/path/to/evoalign
-export PYTHONPATH=/path/to/evoalign
-
-# Run all invariants
-python ci/invariants/check_invariants.py
-
-# Run tests for the invariant checker itself
-python -m unittest discover -s tests
-
-# Enforce 100% coverage and 350 LOC cap
-python -m coverage run --branch --source=ci/invariants,evoalign -m unittest discover -s tests
-python -m coverage report --fail-under=100
-python ci/invariants/loc_check.py
-```
-
-### Installation (CLI)
-
-```bash
-pip install -e .
-evoalign --help
-```
-
-### CLI Tooling
-
-```bash
-# Canonical hash for a data file
-evoalign hash aars/aar_v0_1.json
-
-# Verify the evidence chain locally
-evoalign verify-chain --repo-root .
-
-# Scaffold a new AAR with previous hash
-evoalign new-aar --previous "$(evoalign hash aars/aar_v0_1.json)"
-```
-
-### CI Pipeline
-
-The GitHub Actions pipeline (`ci/pipelines/invariants.yaml`) runs:
-
-1. **Schema validation** - Validates schemas + data files via `schema_validation.py`
-2. **Core invariants** - Runs the full invariant suite
-3. **Context inventory** - Emits context usage artifact
-4. **Coverage + LOC gates** - Enforces 100% coverage and 350 LOC cap
-5. **Secrecy boundary** - Generates secrecy audit artifact
-6. **Salvage safety** - Verifies salvage artifact certifications
-7. **Contract governance** - Ensures RFC and approval requirements
-
-All jobs must pass for the **Invariant Gate** to allow merge.
+---
 
 ## Directory Structure
 
 ```
-.
+evoalign/
 ├── aars/
-│   └── aar_v0_1.json                 # Example AAR
+│   └── aar_v0_1.json                 # Example Alignment Assurance Report
 ├── chronicle/
 │   └── events/                       # Chronicle anomaly entries
+│       ├── event_anomaly_001.json
+│       └── event_threshold_002.json
 ├── ci/
-│   ├── invariants/                   # Invariant checks + tooling
-│   └── pipelines/invariants.yaml     # GitHub Actions config
+│   ├── invariants/                   # 19 invariant checkers + utilities
+│   │   ├── check_invariants.py       # Main entry point
+│   │   ├── schema_validation.py      # SCHEMA_VALIDATION invariant
+│   │   ├── aar_evidence_chain.py     # AAR_EVIDENCE_CHAIN invariant
+│   │   ├── lineage_integrity.py      # LINEAGE_INTEGRITY invariant
+│   │   ├── chronicle_governance.py   # CHRONICLE_GOVERNANCE invariant
+│   │   ├── tamper_evidence.py        # TAMPER_EVIDENCE invariant
+│   │   ├── runtime_config.py         # RUNTIME_CONFIG invariant
+│   │   └── ...                       # Other invariants
+│   └── pipelines/
+│       └── invariants.yaml           # GitHub Actions workflow
 ├── contracts/
-│   ├── context_lattice/              # Context lattice registry
-│   └── safety_contracts/             # Safety contract(s)
+│   ├── context_lattice/
+│   │   └── context_lattice_v0_1.yaml # Context lattice registry
+│   └── safety_contracts/
+│       └── safety_contract_v0_4.yaml # Safety contract
 ├── control_plane/
-│   ├── runtime/              # Damping + monitoring configs
 │   ├── evals/
 │   │   ├── datasets/manifests/       # Dataset manifests
 │   │   ├── runs/                     # Eval run manifests
 │   │   └── suites/                   # Suite registry + sets + hash registries
-│   └── governor/
-│       ├── oversight_plans/          # Oversight plans
-│       ├── risk_fits/                # Risk fits
-│       └── sweeps/                   # Risk sweep manifests
-├── docs/                             # Supporting documentation
-├── evoalign/                         # Lattice + provenance utilities
-├── lineage/                          # Lineage ledger entries (append-only)
-├── schemas/                          # JSON Schemas
-└── tests/                            # Unit tests
+│   │       ├── registry.json
+│   │       ├── sets/
+│   │       └── hash_registries/
+│   ├── governor/
+│   │   ├── oversight_plans/          # Oversight plans
+│   │   ├── risk_fits/                # Risk curve fits
+│   │   └── sweeps/                   # Risk sweep manifests
+│   ├── keys/
+│   │   └── key_registry_v0_1.json    # Public key registry
+│   └── runtime/
+│       ├── damping_v0_1.json         # Damping configuration
+│       └── monitoring_v0_1.json      # Monitoring configuration
+├── docs/
+│   ├── CONTEXT_LATTICE.md            # Context lattice semantics
+│   ├── PROVENANCE_HASHING.md         # Canonical hashing standard
+│   ├── SECRECY_HASH_REGISTRY.md      # Secrecy enforcement
+│   ├── LINEAGE_CHRONICLE.md          # Lineage + chronicle system
+│   ├── TAMPER_EVIDENCE.md            # Merkle roots + PKI
+│   ├── RUNTIME_GUARDRAILS.md         # Damping + monitoring
+│   └── HANDOFF_HARDENING.md          # Schema validation + CLI
+├── evoalign/
+│   ├── __init__.py
+│   ├── cli.py                        # CLI tooling (hash, verify-chain, new-aar)
+│   ├── context_lattice.py            # Lattice engine
+│   ├── merkle.py                     # Merkle tree utilities
+│   ├── provenance.py                 # Canonical hashing
+│   └── secrecy_fingerprints.py       # Fingerprinting for secrecy
+├── lineage/
+│   ├── entry_lin_v1_creation.json    # Example lineage entry
+│   └── entry_lin_v1_promotion_canary.json
+├── schemas/                          # 16 JSON schemas
+├── tests/
+│   ├── integration/                  # End-to-end evidence chain test
+│   └── invariants/                   # Invariant unit tests
+├── LICENSE                           # MIT
+├── pyproject.toml                    # Package metadata + entrypoint
+└── setup.py                          # Editable install shim
 ```
+
+---
+
+## CI Pipeline
+
+The GitHub Actions pipeline (`ci/pipelines/invariants.yaml`) runs:
+
+1. **Schema validation** — Validates all artifacts against schemas via `schema_validation.py`
+2. **Core invariants** — Runs the full 19-invariant suite
+3. **Context inventory** — Emits context usage artifact
+4. **Coverage + LOC gates** — Enforces 100% coverage and 350 LOC cap
+5. **Secrecy boundary** — Generates secrecy audit artifact
+6. **Salvage safety** — Verifies salvage artifact certifications
+7. **Contract governance** — Ensures RFC and approval requirements
+
+All jobs must pass for the **Invariant Gate** to allow merge.
+
+---
 
 ## Usage Examples
 
@@ -184,13 +317,13 @@ All jobs must pass for the **Invariant Gate** to allow merge.
 
 ```python
 import json
+import yaml
 from jsonschema import validate
 
 with open("schemas/SafetyContract.schema.json") as f:
     schema = json.load(f)
 
 with open("contracts/safety_contracts/safety_contract_v0_4.yaml") as f:
-    import yaml
     contract = yaml.safe_load(f)
 
 validate(instance=contract, schema=schema)
@@ -229,39 +362,21 @@ else:
             print(f"FAILED: {r['name']} - {r['message']}")
 ```
 
-## Key Design Decisions
-
-### Why JSON Schema?
-
-- **Standardized**: Widely supported validation tooling
-- **Machine-readable**: Enables automated enforcement
-- **Self-documenting**: Schema IS the documentation
-- **Language-agnostic**: Works with any language/toolchain
-
-### Why CI Invariants?
-
-- **Shift left**: Catch violations before merge, not in production
-- **Automated**: No human gatekeeping bottleneck
-- **Auditable**: Every check is logged
-- **Immutable**: Can't be bypassed by "just this once"
-
-### Conservative Defaults
-
-The invariant checks follow a "fail-closed" philosophy:
-- Missing evidence = FAIL (not skip)
-- Ambiguous state = FAIL (not pass)
-- Unknown artifacts = FAIL (not ignore)
+---
 
 ## Extending the System
 
 ### Adding a New Invariant
 
-1. Create a new class inheriting from `InvariantChecker`
+1. Create a new class inheriting from `InvariantChecker` in `ci/invariants/`
 2. Implement the `check()` method returning `InvariantCheck`
-3. Add to `ALL_INVARIANTS` list
+3. Add to `ALL_INVARIANTS` list in `check_invariants.py`
 4. Add tests in `tests/invariants/`
+5. Ensure 100% coverage
 
 ```python
+from base import InvariantCheck, InvariantChecker, InvariantResult
+
 class MyNewInvariant(InvariantChecker):
     def check(self) -> InvariantCheck:
         # Your check logic here
@@ -283,48 +398,52 @@ class MyNewInvariant(InvariantChecker):
 
 1. Create `YourSchema.schema.json` in `schemas/`
 2. Use `$id` for canonical URI
-3. Add to SCHEMA_MAP in CI pipeline for validation
+3. Add to target map in `schema_validation.py`
 4. Document in this README
+
+---
 
 ## Documentation
 
-Key docs in `docs/`:
+| Document | Purpose |
+|----------|---------|
+| `docs/CONTEXT_LATTICE.md` | Context lattice semantics, ordering, coverage rules |
+| `docs/PROVENANCE_HASHING.md` | Canonical hashing standard, fit provenance hardening |
+| `docs/SECRECY_HASH_REGISTRY.md` | Secret hash registry, fingerprinting, CI enforcement |
+| `docs/LINEAGE_CHRONICLE.md` | Lineage ledger entries, chronicle events, chain integrity |
+| `docs/TAMPER_EVIDENCE.md` | Merkle roots, public key registry, signature verification |
+| `docs/RUNTIME_GUARDRAILS.md` | Damping config, monitoring config, AAR binding |
+| `docs/HANDOFF_HARDENING.md` | Schema validation invariant, CLI tooling |
 
-- `docs/CONTEXT_LATTICE.md` — Context lattice semantics and coverage rules
-- `docs/PROVENANCE_HASHING.md` — Canonical hashing + provenance hardening
-- `docs/SECRECY_HASH_REGISTRY.md` — Secret hash registry and enforcement
-- `docs/LINEAGE_CHRONICLE.md` — Lineage ledger and chronicle entries
-- `docs/TAMPER_EVIDENCE.md` — Merkle roots and signature verification
-- `docs/RUNTIME_GUARDRAILS.md` — Damping and monitoring configuration
-- `docs/HANDOFF_HARDENING.md` — Schema validation and CLI tooling
+---
 
-## Relationship to EvoAlign v2 Spec
+## Key Design Decisions
 
-This implementation covers:
+### Why JSON Schema?
 
-- ✅ §3: Safety Contract (hazards, severities, tolerances)
-- ✅ §4: Context lattice semantics and governance
-- ✅ §5: Risk modeling, sweeps, fits, and oversight planning
-- ✅ Fit provenance hardening (manifests, hashing, fit/plan/AAR bindings)
-- ✅ §6: Evaluation provenance + secrecy enforcement
-- ✅ §9: Salvage with taint tracking (invariants)
-- ✅ §11.4: Rollback requirements (invariants)
-- ✅ §12.2: Contract/lattice governance (invariants)
-- ✅ §13: AAR structure with hash bindings
-- ✅ §14.3: CI-enforceable invariants
-- ✅ §8.4: Lineage ledger schema + example artifacts
-- ✅ §10: Chronicle schema (anomaly-focused) + example artifacts
-- ✅ §12.3: Cryptographic tamper evidence (Merkle roots + optional signatures)
-- ✅ §5.5-5.6: Stability controls and damping (config schemas + invariant)
-- ✅ §11.1-11.3: Operational monitoring (config schemas + invariant)
+- **Standardized**: Widely supported validation tooling
+- **Machine-readable**: Enables automated enforcement
+- **Self-documenting**: Schema IS the documentation
+- **Language-agnostic**: Works with any language/toolchain
 
-Not yet implemented (future work):
+### Why CI Invariants?
 
-- ⬜ §7: Experience Graph schema
+- **Shift left**: Catch violations before merge, not in production
+- **Automated**: No human gatekeeping bottleneck
+- **Auditable**: Every check is logged
+- **Immutable**: Can't be bypassed by "just this once"
+
+### Why Fail-Closed?
+
+- **Safety-critical**: Missing evidence is not acceptable
+- **No silent failures**: Ambiguity must be resolved explicitly
+- **Defense in depth**: Multiple invariants catch different failure modes
+
+---
 
 ## License
 
-See LICENSE file in repository root.
+MIT — See [LICENSE](LICENSE) file.
 
 ---
 
